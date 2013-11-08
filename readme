@@ -1,0 +1,4 @@
+for running the simulation run test_ACO(algorithm, strategy)
+
+for the momentalgorithm is a string and can be either 'kriging', or 'mutualInfo'
+strategy for now can be 'ACO' or 'sampleOnly'...planning on adding random strategy ( already implemente but not teste yet and greedy).
