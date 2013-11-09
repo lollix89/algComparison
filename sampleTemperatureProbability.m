@@ -23,7 +23,7 @@ for i=1:size(X)
     sampledTemperatureMap(floor((X(i)+1)/delta)+1,floor((Y(i)+1)/delta)+1) = samples(i);
 end
 
- sampledTemperatureMap= interpolate(sampledTemperatureMap);
+ sampledTemperatureMap= interpolate(sampledTemperatureMap, 1);
 % figure(2)
 % [~, ch]=contourf(1:5:201,1:5:201,sampledTemperatureMap,30);
 % set(ch,'edgecolor','none');

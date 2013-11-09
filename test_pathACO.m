@@ -1,6 +1,5 @@
 function test_pathACO(algorithm, strategy)
-% main function
-% compute a path for the mobile robot in function of the kriging error
+
 close all;
 plotOn=1;% 1 plot on, 0 : plot off
 
@@ -12,29 +11,34 @@ nWPpath=10;% number of waypoints in the path
 alreadySampled=[];
 errorMap=[];
 
-% load the random field
-FT=1; %1 : long range, 2 : intermediate range, 3 : short range
-fieldNum=1; %100 available realization of each random field (1->100)
-if FT==1
-    field=load(['./RandomFields/RandField_LR_No' num2str(200+fieldNum) '.csv']);
-    fieldRange= 100;
-elseif FT==2
-    field=load(['./RandomFields/RandField_IR_No' num2str(100+fieldNum) '.csv']);
-    fieldRange= 50;
-elseif FT==3
-    field=load(['./RandomFields/RandField_SR_No' num2str(fieldNum) '.csv']);
-    fieldRange= 10;
+%---------------Load a random field---------------
+if isdir('./RandomFields')
+    RandStream.setDefaultStream(RandStream('mt19937ar','seed',sum(100*clock)));
+    fieldNum= randi([1 100]);
+    jobID= randi([1 3]);
+    if mod(jobID, 3)== 1
+        field=load(['./RandomFields/RandField_LR_No' num2str(200+fieldNum) '.csv']);
+        fieldRange= 100;
+    elseif mod(jobID,3)== 2
+        field=load(['./RandomFields/RandField_IR_No' num2str(100+fieldNum) '.csv']);
+        fieldRange= 50;
+    else
+        field=load(['./RandomFields/RandField_SR_No' num2str(fieldNum) '.csv']);
+        fieldRange= 10;
+    end
+else
+    error('Directory does not exist!!!')
 end
 
 %we want a field of 200x200 m. (not 199x199)
 field(:,end+1)=field(:,end);
-field(end+1,:)=field(end,:); 
+field(end+1,:)=field(end,:);
 [Ly,Lx]=size(field);
 
 %position of the stations (static sensors)
 stations=[];
- stations(:,1)=[24 34 14 94 134 74 94 166 186 174 0 0];
- stations(:,2)=[166 94 22 14 86 66 174 174 106 34 0 199];
+stations(:,1)=[24 34 14 94 134 74 94 166 186 174];
+stations(:,2)=[166 94 22 14 86 66 174 174 106 34];
 
 if plotOn==1
     subplot(1,3,1);
@@ -84,18 +88,18 @@ dist(iter)=0; %traveled distance
 h0=0; % distance traveld by the quadrotor since the last waypoint
 
 if strcmp(algorithm, 'mutualInfo')
-   [prior,posterior,mutualInfo, temperatureVector]= initializeProbabilities(x_,y_);
+    [prior,posterior,mutualInfo, temperatureVector]= initializeProbabilities(x_,y_);
     
 end
-%% loop while the travelded distance is smaller than 3000 m
-while (strcmp('ACO', strategy) && dist(iter)<3040) || (strcmp('maxValue', strategy) && iter <=150)
+%% loop
+while (strcmp('ACO', strategy) && dist(iter)<3040) || (strcmp('sampleOnly', strategy) && iter <=150)
     display(iter)
     %----------------------------------------------------------------------
     %get sampling points
     X=[];
     indK=kVec(~isnan(sVec)); % get the indices of the sampling points
     indY = ceil(indK/lx);
-    indX = indK -(indY-1)*lx; 
+    indX = indK -(indY-1)*lx;
     Y=sVec(indK); % sampled values
     X(:,1)=x(indX); % sampling points position
     X(:,2)=y(indY); % sampling points position
@@ -120,7 +124,6 @@ while (strcmp('ACO', strategy) && dist(iter)<3040) || (strcmp('maxValue', strate
             [val,krigE_]=kriging(X,Y_,stdV,meanV,fittedModel,fittedParam,trendOrder,x_,y_);
             errorMap= krigE_;
         case 'mutualInfo'
-            %need to resample Y as well!!..;)
             if ~isempty(alreadySampled)
                 [XToBeSampled, indexUniqe]= setdiff(X,alreadySampled,'rows');
                 YToBeSampled= Y(indexUniqe);
@@ -132,8 +135,8 @@ while (strcmp('ACO', strategy) && dist(iter)<3040) || (strcmp('maxValue', strate
             val= sampleTemperatureProbability( posterior, temperatureVector, X(:,2), X(:,1), Y, delta);
             alreadySampled= [alreadySampled; XToBeSampled];
             errorMap= mutualInfo;
-
-    end    
+            
+    end
     
     RMSE(iter) = sqrt(mean(mean((val-field(1:delta:lx,1:delta:ly)).^2)));
     switch strategy
@@ -154,16 +157,16 @@ while (strcmp('ACO', strategy) && dist(iter)<3040) || (strcmp('maxValue', strate
             pos= indX + (indY-1)*lpx;
             
             [Pts2visit,dist(iter+1),h0] = findPtsAlongPath(path, speedHeli, measPeriod,dist(iter),h0);
-        case 'maxValue'
+        case 'sampleOnly'
             [~, idx]= max(errorMap(:));
             [row,col]= ind2sub(size(errorMap), idx);
             Pts2visit= [(col-1)*delta (row-1)*delta];
     end
     %----------------------------------------------------------------------
     %add new sampling points
-%         if iter==1
-%             sVec=addSamplingPoints(sVec,[0,0],field,x,y,lx);
-%         end
+    %         if iter==1
+    %             sVec=addSamplingPoints(sVec,[0,0],field,x,y,lx);
+    %         end
     sVec=addSamplingPoints(sVec,Pts2visit,field,x,y,lx);
     %----------------------------------------------------------------------
     if plotOn==1
@@ -190,7 +193,6 @@ while (strcmp('ACO', strategy) && dist(iter)<3040) || (strcmp('maxValue', strate
     end
     iter=iter+1;
 end
-
 if strcmp(strategy, 'ACO')
     dist=dist(1:end-1);
     RMSE_=interp1(dist,RMSE,0:50:3000);
@@ -208,7 +210,7 @@ end
 
 %==========================================================================
 function [Dh,Dv,Ddu,Ddd]=distanceMatrix(x_,y_,krigE,x,y)
-% create the matrices that contains the disance for the ACO algorithm
+% create the matrices that contains the distance for the ACO algorithm
 % input: x_,y_          grid positions
 %        krigE          Value of the krigE at the grid position
 %        x,y            allowable waypoints positions
@@ -227,7 +229,7 @@ for i=1:length(y)
     for j=1:length(x)-1
         %Dh(i,j)=1.5-(krigE(i,j)+krigE(i,j+1));
         for k=0:n
-            Dh(i,j) = Dh(i,j) + bilinInterp(x_,y_,krigE,x(j)+k*dh,y(i),lx_1,ly_1); 
+            Dh(i,j) = Dh(i,j) + bilinInterp(x_,y_,krigE,x(j)+k*dh,y(i),lx_1,ly_1);
         end
         %Dh(i,j) = 1.5 - (Dh(i,j)/5);
         Dh(i,j) = Dh(i,j)/(n+1);
@@ -239,7 +241,7 @@ for i=1:length(y)-1
     for j=1:length(x)
         %Dv(i,j)=1.5-(krigE(i,j)+krigE(i+1));
         for k=0:n
-            Dv(i,j) = Dv(i,j) + bilinInterp(x_,y_,krigE,x(j),y(i)+k*dh,lx_1,ly_1); 
+            Dv(i,j) = Dv(i,j) + bilinInterp(x_,y_,krigE,x(j),y(i)+k*dh,lx_1,ly_1);
         end
         %Dv(i,j) = 1.5 - (Dv(i,j)/5);
         Dv(i,j) = Dv(i,j)/(n+1);
@@ -250,8 +252,8 @@ for i=1:length(y)-1
     for j=1:length(x)-1
         %Dv(i,j)=1.5-(krigE(i,j)+krigE(i+1));
         for k=0:n
-            Ddu(i,j) = Ddu(i,j) + bilinInterp(x_,y_,krigE,x(j)+k*dh,y(i)+k*dh,lx_1,ly_1); 
-            Ddd(i,j) = Ddd(i,j) + bilinInterp(x_,y_,krigE,x(j)+k*dh,y(i+1)-k*dh,lx_1,ly_1); 
+            Ddu(i,j) = Ddu(i,j) + bilinInterp(x_,y_,krigE,x(j)+k*dh,y(i)+k*dh,lx_1,ly_1);
+            Ddd(i,j) = Ddd(i,j) + bilinInterp(x_,y_,krigE,x(j)+k*dh,y(i+1)-k*dh,lx_1,ly_1);
         end
         %Dv(i,j) = 1.5 - (Dv(i,j)/5);
         Ddu(i,j) = Ddu(i,j)/(n+1);
@@ -282,12 +284,12 @@ function sVec=addSamplingPoints(sVec,X,field,x,y,lx)
 %        x,y            field positions
 %        lx             length of the field
 
-    for i=1:length(X(:,1))
-        indX = round(X(i,1))+1;
-        indY = round(X(i,2))+1;
-        indK = indX+(indY-1)*lx;
-        sVec(indK) = field(y(indY)+1,x(indX)+1);
-    end
+for i=1:length(X(:,1))
+    indX = round(X(i,1))+1;
+    indY = round(X(i,2))+1;
+    indK = indX+(indY-1)*lx;
+    sVec(indK) = field(y(indY)+1,x(indX)+1);
+end
 end
 
 function val=bilinInterp(x,y,f,x0,y0,lx_1,ly_1)
@@ -309,7 +311,7 @@ end
 
 if (Iy1 < 1)
     Iy1 = 1;
- elseif (Iy1 > ly_1) 
+elseif (Iy1 > ly_1)
     Iy1 = ly_1;
 end
 
