@@ -1,7 +1,7 @@
-function test_pathACO(algorithm, strategy)
+function test_pathACO(jobID, algorithm, strategy)
 
 close all;
-plotOn=1;% 1 plot on, 0 : plot off
+plotOn=0;% 1 plot on, 0 : plot off
 
 
 % a path of nWPpath waypoints is recomputed each time the robot reaches
@@ -15,7 +15,6 @@ errorMap=[];
 if isdir('./RandomFields')
     RandStream.setDefaultStream(RandStream('mt19937ar','seed',sum(100*clock)));
     fieldNum= randi([1 100]);
-    jobID= randi([1 3]);
     if mod(jobID, 3)== 1
         field=load(['./RandomFields/RandField_LR_No' num2str(200+fieldNum) '.csv']);
         fieldRange= 100;
@@ -79,7 +78,6 @@ speedHeli=3.7; %volocity of the quadrotor
 measPeriod=3; %sampling period
 trendOrder=0; %order of the trend function 0,1 or 2
 pos=1;%initial position
-fid = fopen('./test.txt','w');%open output file
 
 iter=1;
 dist=[];%traveled distance
@@ -93,7 +91,6 @@ if strcmp(algorithm, 'mutualInfo')
 end
 %% loop
 while (strcmp('ACO', strategy) && dist(iter)<3040) || (strcmp('sampleOnly', strategy) && iter <=150)
-    display(iter)
     %----------------------------------------------------------------------
     %get sampling points
     X=[];
@@ -200,11 +197,14 @@ else
     RMSE_= RMSE;
 end
 
-for i=1:length(RMSE_)
-    fprintf(fid,'%f ',RMSE_(i));
+%---------------saves results on file-------------------------
+if ~exist('./results', 'dir')
+    mkdir('./results');
 end
-fprintf(fid,'\n');
-fclose(fid);
+
+FileName= strcat('./results/SimulationResultJob_', num2str(jobID), '.mat');
+save( FileName, 'RMSE_','algorithm','strategy','jobID');
+
 end
 
 

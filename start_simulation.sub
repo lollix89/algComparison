@@ -1,0 +1,11 @@
+#!/bin/bash
+#$ -N simulation
+#$ -o matlabSimulation.log
+#$ -j y
+#$ -cwd
+#$ -t 1-600
+#$ -M lorenzo.sarti@epfl.ch
+
+
+matlab -nodisplay -nodesktop -nojvm -r "test_pathACO($SGE_TASK_ID, 'mutualInfo', 'ACO'),exit" > stdout
+
