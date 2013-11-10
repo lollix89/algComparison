@@ -143,12 +143,11 @@ while (strcmp('ACO', strategy) && dist(iter)<3040) || (strcmp('sampleOnly', stra
     end
     
     RMSE(iter) = sqrt(mean(mean((val-field(1:delta:lx,1 :delta:ly)).^2)));
+    maxValue= 5;
+    errorMap= errorMap -min(errorMap(:));
+    errorMap= (errorMap./max(errorMap(:))).* maxValue;
     switch strategy
         case 'ACO'
-            maxValue= 5;
-            errorMap= errorMap -min(errorMap(:));
-            errorMap= (errorMap./max(errorMap(:))).* maxValue;
-
             %----------------------------------------------------------------------
             %compute path
             [Dh,Dv,Ddu,Ddd]=distanceMatrix(x_,y_,errorMap,px,py);
