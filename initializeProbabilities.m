@@ -4,7 +4,7 @@ function [fieldPrior, fieldPosterior,  mutualInformationMap,  temperatureVector]
             fieldPosterior= [];
             mutualInformationMap=[];
             temperatureRange=[-12,58];
-            temperatureInterval= .5;
+            temperatureInterval= .2;
             %---------------create temperatureVector------------------
             temperatureVector= (temperatureRange(1):temperatureInterval:temperatureRange(2));
             %-------------initialize probabilities distributions----------

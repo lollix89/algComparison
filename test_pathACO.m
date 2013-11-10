@@ -14,8 +14,8 @@ errorMap=[];
 %---------------Load a random field---------------
 if isdir('./RandomFields')
     RandStream.setDefaultStream(RandStream('mt19937ar','seed',sum(100*clock)));
-    fieldNum= randi([1 100]);
-    jobID= randi([1 3]);
+    fieldNum= 1;%randi([1 100]);
+    jobID= 1;%randi([1 3]);
     if mod(jobID, 3)== 1
         field=load(['./RandomFields/RandField_LR_No' num2str(200+fieldNum) '.csv']);
         fieldRange= 100;
@@ -110,14 +110,13 @@ while (strcmp('ACO', strategy) && dist(iter)<3040) || (strcmp('sampleOnly', stra
             meanV=mean(Y);
             stdV=std(Y);
             Y_=(Y-meanV)/stdV;
-            
             %----------------------------------------------------------------------
             %compute variogram
             % the variogam is computed at discrete positions separated by a
             % distance called lag
             lag=10;
-            range=130; % range considered to compute the variogram
-            [fittedModel,fittedParam]=variogram(X,Y_,lag,range,1);
+            Range=130; % range considered to compute the variogram
+            [fittedModel,fittedParam]=variogram(X,Y_,lag,Range,1);
             
             %----------------------------------------------------------------------
             %kriging interpolation
@@ -132,7 +131,15 @@ while (strcmp('ACO', strategy) && dist(iter)<3040) || (strcmp('sampleOnly', stra
                 YToBeSampled= Y;
             end
             [prior, posterior, mutualInfo]= computePosteriorAndMutualInfo(prior, posterior, mutualInfo, temperatureVector, YToBeSampled, XToBeSampled(:,2), XToBeSampled(:,1), y_, x_, fieldRange);
-            val= sampleTemperatureProbability( posterior, temperatureVector, X(:,2), X(:,1), Y, delta);
+            %val= sampleTemperatureProbability( posterior, temperatureVector, X(:,2), X(:,1), Y, delta);
+            meanV=mean(Y);
+            stdV=std(Y);
+            Y_=(Y-meanV)/stdV;
+            lag=10;
+            Range=130; 
+            [fittedModel,fittedParam]=variogram(X,Y_,lag,Range,1);
+            [val,~]=kriging(X,Y_,stdV,meanV,fittedModel,fittedParam,trendOrder,x_,y_);
+            %
             alreadySampled= [alreadySampled; XToBeSampled];
             errorMap= mutualInfo;
             
@@ -141,6 +148,8 @@ while (strcmp('ACO', strategy) && dist(iter)<3040) || (strcmp('sampleOnly', stra
     RMSE(iter) = sqrt(mean(mean((val-field(1:delta:lx,1:delta:ly)).^2)));
     switch strategy
         case 'ACO'
+            %errorMap= errorMap -min(errorMap(:));
+            %errorMap= errorMap./max(errorMap(:));
             %----------------------------------------------------------------------
             %compute path
             [Dh,Dv,Ddu,Ddd]=distanceMatrix(x_,y_,errorMap,px,py);

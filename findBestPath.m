@@ -89,6 +89,9 @@ for K=1:50
         bestpath = visitedNodes{currentBestK};
         bestFitness=currentBestFitness;
     end
+%     if ~exist('bestpath')
+%         disp('doesn t exist')
+%     end
     [tauH,tauV,tauDu,tauDd]=updatePheromone(bestpath,tauH,tauV,tauDu,tauDd,bestFitness,mu);
     
     %tauH
