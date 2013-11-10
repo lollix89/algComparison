@@ -7,17 +7,17 @@ for i=1: size(X,1)
         for y_=1:size(pointY,2)
             
             currentDistance= pdist([X(i) Y(i); pointX(x_) pointY(y_)]);
-%             if currentDistance <= range
-%                 varianceFunction= .001 + .1* currentDistance;
-%             else
-%                 varianceFunction= .001 + .5* currentDistance;
-%             end
-            
             if currentDistance <= range
-                varianceFunction= .001 + (sill*(1.5*(currentDistance/range)-.5*(currentDistance/range)^3));
+                varianceFunction= .001 + .1* currentDistance;
             else
-                varianceFunction=  sill;
+                varianceFunction= .001 + .5* currentDistance;
             end
+            
+%             if currentDistance <= range
+%                 varianceFunction= .001 + (sill*(1.5*(currentDistance/range)-.5*(currentDistance/range)^3));
+%             else
+%                 varianceFunction=  sill;
+%             end
             
             likelihoodCurrentCell= pdf('norm', temperatureVector, temperatureVector(closestValueIndex), varianceFunction);
             likelihoodCurrentCell= likelihoodCurrentCell./sum(likelihoodCurrentCell);

@@ -195,7 +195,7 @@ while (strcmp('ACO', strategy) && dist(iter)<3040) || (strcmp('sampleOnly', stra
 end
 if strcmp(strategy, 'ACO')
     dist=dist(1:end-1);
-    RMSE_=interp1(dist,RMSE,0:50:3000);
+    RMSE_=interp1(dist,RMSE,0:50:3000,'linear','extrap');
 else
     RMSE_= RMSE;
 end
