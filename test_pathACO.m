@@ -129,7 +129,14 @@ while (strcmp('ACO', strategy) && dist(iter)<3040) || (strcmp('sampleOnly', stra
                 YToBeSampled= Y;
             end
             [prior, posterior, mutualInfo]= computePosteriorAndMutualInfo(prior, posterior, mutualInfo, temperatureVector, YToBeSampled, XToBeSampled(:,2), XToBeSampled(:,1), y_, x_, fieldRange);
-            val= sampleTemperatureProbability( posterior, temperatureVector, X(:,2), X(:,1), Y, delta);
+            %val= sampleTemperatureProbability( posterior, temperatureVector, X(:,2), X(:,1), Y, delta);
+            meanV=mean(Y);
+            stdV=std(Y);
+            Y_=(Y-meanV)/stdV;
+            lag=10;
+            Range=130; 
+            [fittedModel,fittedParam]=variogram(X,Y_,lag,Range,1);
+            [val,~]=kriging(X,Y_,stdV,meanV,fittedModel,fittedParam,trendOrder,x_,y_);
             alreadySampled= [alreadySampled; XToBeSampled];
             errorMap= mutualInfo;
             
