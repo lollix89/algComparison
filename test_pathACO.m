@@ -166,11 +166,9 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && dist(iter)<3040)
             [Pts2visit,dist(iter+1),h0] = findPtsAlongPath(path, speedHeli, measPeriod,dist(iter),h0);
         case 'greedy'
             %compute path
-            [Dh,Dv,Ddu,Ddd]=distanceMatrix(x_,y_,errorMap,px,py);
+            [Dh,Dv,Dd   u,Ddd]=distanceMatrix(x_,y_,errorMap,px,py);
             %[path, pos]=findShortestPath(px,py,pos,kMax,Dh,Dv);
             path=greedy(px,py,pos,Dh,Dv,Ddu,Ddd,nWPpath);
-            %[path, fitness]=greedy(px,py,pos,Dh,Dv,Ddu,Ddd,nWayPoints);
-            %path=computeRect(px(1),px(end),py(1),py(end),7)
             
             nP=min(nWayPoints+1,length(path));
             path=path(1:nP,:);
