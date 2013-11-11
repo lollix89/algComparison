@@ -40,6 +40,7 @@ stations=[];
 stations(:,1)=[24 34 14 94 134 74 94 166 186 174];
 stations(:,2)=[166 94 22 14 86 66 174 174 106 34];
 
+
 if plotOn==1
     subplot(1,3,1);
     plotmap(0:2:Lx-1,0:2:Ly-1,field(1:2:end,1:2:end));
@@ -132,6 +133,7 @@ while (strcmp('ACO', strategy) && dist(iter)<3040) || (strcmp('sampleOnly', stra
             end
             [prior, posterior, mutualInfo]= computePosteriorAndMutualInfo(prior, posterior, mutualInfo, temperatureVector, YToBeSampled, XToBeSampled(:,2), XToBeSampled(:,1), y_, x_, fieldRange);
             %val= sampleTemperatureProbability( posterior, temperatureVector, X(:,2), X(:,1), Y, delta);
+            %using kriging as interpolation algorithm
             meanV=mean(Y);
             stdV=std(Y);
             Y_=(Y-meanV)/stdV;
