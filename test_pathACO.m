@@ -93,7 +93,7 @@ if strcmp(algorithm, 'mutualInfo')
     
 end
 %% loop
-while (strcmp('ACO', strategy) && dist(iter)<3040) || ((strcmp('sampleOnly', strategy)|| strcmp('random', strategy)) && iter <=150)
+while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && dist(iter)<3040) || ((strcmp('sampleOnly', strategy)|| strcmp('random', strategy)) && iter <=150)
     display(iter)
     %----------------------------------------------------------------------
     %get sampling points
@@ -150,13 +150,25 @@ while (strcmp('ACO', strategy) && dist(iter)<3040) || ((strcmp('sampleOnly', str
     RMSE(iter) = sqrt(mean(mean((val-field(1:delta:lx,1:delta:ly)).^2)));
     switch strategy 
         case 'ACO'
-            errorMap= errorMap -min(errorMap(:));
-            errorMap= errorMap./max(errorMap(:));
-            %----------------------------------------------------------------------
+            %compute path
+            [Dh,Dv,Ddu,Ddd]=distanceMatrix(x_,y_,errorMap,px,py);
+            [path,~]=findBestPath(px,py,pos,Dh,Dv,Ddu,Ddd,nWPpath,0.6,4.4);
+            %[path, fitness]=greedy(px,py,pos,Dh,Dv,Ddu,Ddd,nWayPoints);
+            %path=computeRect(px(1),px(end),py(1),py(end),7)
+            
+            nP=min(nWayPoints+1,length(path));
+            path=path(1:nP,:);
+            
+            indX = floor(path(end,1)/ph)+1;
+            indY = floor(path(end,2)/ph)+1;
+            pos= indX + (indY-1)*lpx;
+            
+            [Pts2visit,dist(iter+1),h0] = findPtsAlongPath(path, speedHeli, measPeriod,dist(iter),h0);
+        case 'greedy'
             %compute path
             [Dh,Dv,Ddu,Ddd]=distanceMatrix(x_,y_,errorMap,px,py);
             %[path, pos]=findShortestPath(px,py,pos,kMax,Dh,Dv);
-            [path,~]=findBestPath(px,py,pos,Dh,Dv,Ddu,Ddd,nWPpath,0.6,4.4);
+            path=greedy(px,py,pos,Dh,Dv,Ddu,Ddd,nWPpath);
             %[path, fitness]=greedy(px,py,pos,Dh,Dv,Ddu,Ddd,nWayPoints);
             %path=computeRect(px(1),px(end),py(1),py(end),7)
             
