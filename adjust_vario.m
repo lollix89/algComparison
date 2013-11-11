@@ -17,7 +17,7 @@ function [best_model, best_param, best_RMSE] = adjust_vario(h, vario, var)
 nugget=0;
 
 %inital value of the sill
-%sill = var;%valeur assymptotique théoriquement égale à la variance
+%sill = var;%valeur assymptotique th?oriquement ?gale ? la variance
 sill=(max(vario)+mean(vario))/2;
 %sill=var;
 %sill = polyval(polyfit(h,vario,1),120);
@@ -27,7 +27,7 @@ if(~isempty(range))
     range = range(1);
 else
     range=h((vario>0.9*max(vario))); % If we don't reach the estimated sill, juste take 90% of max
-    range=range(1);
+    %range=range(1);
 end
 
 % 

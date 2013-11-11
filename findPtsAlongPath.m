@@ -39,32 +39,5 @@ end
 hend=offset;
 
 
-% offset=h0;
-% m=1;
-% for i=1:length(coords)-1 %loop over the path positions
-%     v=coords(i+1,:)-coords(i,:);
-%     l=norm(v);
-%     dist=dist+l;
-%     v=v/l; %normalize
-%     n=floor((l-offset)/h); %number of sampling distance in the interval
-%     for k=0:n;
-%         measPts(m,:) = coords(i,:)+(offset+k*h)*v;
-%         m=m+1;
-%     end
-%     offset=h -((l-offset)-n*h);%new offset
-% end
-% 
-% hend=h0;
-%display(m-1)
-
-% figure
-% plot(coords(:,1), coords(:,2),'-r','LineWidth',2);hold on;
-% plot(coords(:,1), coords(:,2), 'or','LineWidth',3)
-% plot(measPts(:,1), measPts(:,2), '.k','LineWidth',3)
-% axis equal
-% xlabel('Coordinate X [m]','FontSize',14)
-% set(gca,'FontSize',14)
-% ylabel('Coordinate Y [m]','FontSize', 14)
-
 
 end

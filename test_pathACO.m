@@ -13,7 +13,7 @@ errorMap=[];
 
 %---------------Load a random field---------------
 if isdir('./RandomFields')
-    RandStream.setDefaultStream(RandStream('mt19937ar','seed',sum(100*clock)));
+    RandStream.setGlobalStream(RandStream('mt19937ar','seed',sum(100*clock)));
     fieldNum= randi([1 100]);
     if mod(jobID, 3)== 1
         field=load(['./RandomFields/RandField_LR_No' num2str(200+fieldNum) '.csv']);
@@ -36,14 +36,17 @@ field(end+1,:)=field(end,:);
 
 %position of the stations (static sensors)
 stations=[];
-stations(:,1)=[24 34 14 94 134 74 94 166 186 174];
-stations(:,2)=[166 94 22 14 86 66 174 174 106 34];
+% stations(:,1)=[24 34 14 94 134 74 94 166 186 174];
+% stations(:,2)=[166 94 22 14 86 66 174 174 106 34];
+
 
 if plotOn==1
     subplot(1,3,1);
     plotmap(0:2:Lx-1,0:2:Ly-1,field(1:2:end,1:2:end));
     hold on
-    plot(stations(:,1),stations(:,2),'ok','linewidth',2,'MarkerFaceColor','k')
+    if ~isempty(stations)
+        plot(stations(:,1),stations(:,2),'ok','linewidth',2,'MarkerFaceColor','k')
+    end
     drawnow
 end
 
@@ -71,13 +74,25 @@ lpy=length(py);
 sVec=ones(lx*ly,1)*nan;
 kVec=1:lx*ly;   %indices
 
-sVec=addSamplingPoints(sVec,stations,field,x,y,lx);
+
 
 %parameters
 speedHeli=3.7; %volocity of the quadrotor
 measPeriod=3; %sampling period
 trendOrder=0; %order of the trend function 0,1 or 2
-pos=1;%initial position
+
+pos= randi([1 121]);    %initial position
+
+Range= 200; % range considered to compute the variogram
+posX= mod(pos-1, lpx)* ph;
+posY= floor((pos-1)/lpx)* ph;
+aX= [max(0, floor(posX-(Range/sqrt(2)))) min(length(x)-1, floor(posX+(Range/sqrt(2))))];
+aY= [max(0, floor(posY-(Range/sqrt(2)))) min(length(y)-1, floor(posY+(Range/sqrt(2))))];
+
+station= [randi(aX) randi(aY)];
+sVec=addSamplingPoints(sVec,[station; posX posY],field,x,y,lx);
+
+fid = fopen('./test.txt','w');%open output file
 
 iter=1;
 dist=[];%traveled distance
@@ -90,7 +105,8 @@ if strcmp(algorithm, 'mutualInfo')
     
 end
 %% loop
-while ((strcmp('ACO', strategy) || strcmp('greedy', strategy)) && dist(iter)<3040) || ((strcmp('sampleOnly', strategy)||strcmp('random',strategy)) && iter <=150)
+while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && dist(iter)<3040) || ((strcmp('sampleOnly', strategy)|| strcmp('random', strategy)) && iter <=150)
+
     %----------------------------------------------------------------------
     %get sampling points
     X=[];
@@ -107,14 +123,12 @@ while ((strcmp('ACO', strategy) || strcmp('greedy', strategy)) && dist(iter)<304
             meanV=mean(Y);
             stdV=std(Y);
             Y_=(Y-meanV)/stdV;
-            
             %----------------------------------------------------------------------
             %compute variogram
             % the variogam is computed at discrete positions separated by a
             % distance called lag
             lag=10;
-            range=130; % range considered to compute the variogram
-            [fittedModel,fittedParam]=variogram(X,Y_,lag,range,1);
+            [fittedModel,fittedParam]=variogram(X,Y_,lag,Range,1);
             
             %----------------------------------------------------------------------
             %kriging interpolation
@@ -134,24 +148,19 @@ while ((strcmp('ACO', strategy) || strcmp('greedy', strategy)) && dist(iter)<304
             stdV=std(Y);
             Y_=(Y-meanV)/stdV;
             lag=10;
-            Range=130; 
             [fittedModel,fittedParam]=variogram(X,Y_,lag,Range,1);
             [val,~]=kriging(X,Y_,stdV,meanV,fittedModel,fittedParam,trendOrder,x_,y_);
             alreadySampled= [alreadySampled; XToBeSampled];
             errorMap= mutualInfo;
             
     end
-    
-    RMSE(iter) = sqrt(mean(mean((val-field(1:delta:lx,1 :delta:ly)).^2)));
-%     maxValue= 5;
-%     errorMap= errorMap -min(errorMap(:));
-%     errorMap= (errorMap./max(errorMap(:))).* maxValue;
-    switch strategy
+
+
+    RMSE(iter) = sqrt(mean(mean((val-field(1:delta:lx,1:delta:ly)).^2)));
+    switch strategy 
         case 'ACO'
-            %----------------------------------------------------------------------
             %compute path
             [Dh,Dv,Ddu,Ddd]=distanceMatrix(x_,y_,errorMap,px,py);
-            %[path, pos]=findShortestPath(px,py,pos,kMax,Dh,Dv);
             [path,~]=findBestPath(px,py,pos,Dh,Dv,Ddu,Ddd,nWPpath,0.6,4.4);
             %path=computeRect(px(1),px(end),py(1),py(end),7)
             
@@ -163,10 +172,11 @@ while ((strcmp('ACO', strategy) || strcmp('greedy', strategy)) && dist(iter)<304
             pos= indX + (indY-1)*lpx;
             
             [Pts2visit,dist(iter+1),h0] = findPtsAlongPath(path, speedHeli, measPeriod,dist(iter),h0);
-            
+
         case 'greedy'
             %compute path
             [Dh,Dv,Ddu,Ddd]=distanceMatrix(x_,y_,errorMap,px,py);
+            %[path, pos]=findShortestPath(px,py,pos,kMax,Dh,Dv);
             path=greedy(px,py,pos,Dh,Dv,Ddu,Ddd,nWPpath);
             
             nP=min(nWayPoints+1,length(path));
@@ -197,6 +207,7 @@ while ((strcmp('ACO', strategy) || strcmp('greedy', strategy)) && dist(iter)<304
             availablePositionIndexes(randIdx,1);
             [row, col]= ind2sub(size(availablePositionMatrix), availablePositionIndexes(randIdx,1));
             Pts2visit= [(col-1) (row-1)];
+
     end
     %----------------------------------------------------------------------
     %add new sampling points
@@ -317,7 +328,7 @@ end
 
 function sVec=addSamplingPoints(sVec,X,field,x,y,lx)
 % addSamplingPoints
-% input: sVec           vector the contain the sampling values
+% input: sVec           vector that contains the sampling values
 %        X              position to  be sampled
 %        field          field value
 %        x,y            field positions

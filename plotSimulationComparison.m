@@ -54,7 +54,11 @@ end
 legendNames{1}= 'kriging approach';
 legendNames{2}= 'mutualInformation approach';
 
+<<<<<<< HEAD
 plotRangeX = (0:50:3000)';
+=======
+plotRangeX = (1:150)';
+>>>>>>> noStations
 if ~exist('./plot', 'dir')
     mkdir('./plot');
 end

@@ -1,5 +1,10 @@
 *.m~
 m*
 k*
+<<<<<<< HEAD
 *.txt
 .DS*
+=======
+.DS*
+
+>>>>>>> noStations
