@@ -90,7 +90,7 @@ if strcmp(algorithm, 'mutualInfo')
     
 end
 %% loop
-while (strcmp('ACO', strategy) && dist(iter)<3040) || (strcmp('sampleOnly', strategy) && iter <=150)
+while (strcmp('ACO', strategy) && dist(iter)<3040) || ((strcmp('sampleOnly', strategy)||strcmp('random',strategy)) && iter <=150)
     %----------------------------------------------------------------------
     %get sampling points
     X=[];
@@ -168,6 +168,22 @@ while (strcmp('ACO', strategy) && dist(iter)<3040) || (strcmp('sampleOnly', stra
             [~, idx]= max(errorMap(:));
             [row,col]= ind2sub(size(errorMap), idx);
             Pts2visit= [(col-1)*delta (row-1)*delta];
+        case 'random'
+            availablePositionMatrix= ones(lx-1,ly-1);
+            occupiedPositions= [];
+            if ~isempty(stations)
+                indX = round(stations(:,1))+1;
+                indY = round(stations(:,2))+1;
+                stationsIdxX= x(indX)+1;
+                stationsIdxY= y(indY)+1;
+                occupiedPositions = sub2ind(size(availablePositionMatrix), stationsIdxY', stationsIdxX');
+            end
+            availablePositionMatrix(occupiedPositions)= 0;
+            availablePositionIndexes= find(availablePositionMatrix== 1);
+            randIdx= randi([1,size(availablePositionIndexes,1)]);
+            availablePositionIndexes(randIdx,1);
+            [row, col]= ind2sub(size(availablePositionMatrix), availablePositionIndexes(randIdx,1));
+            Pts2visit= [(col-1) (row-1)];
     end
     %----------------------------------------------------------------------
     %add new sampling points
