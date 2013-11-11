@@ -93,7 +93,7 @@ if strcmp(algorithm, 'mutualInfo')
     
 end
 %% loop
-while (strcmp('ACO', strategy) && dist(iter)<3040) || (strcmp('sampleOnly', strategy) && iter <=150)
+while (strcmp('ACO', strategy) && dist(iter)<3040) || ((strcmp('sampleOnly', strategy)|| strcmp('random', strategy)) && iter <=150)
     display(iter)
     %----------------------------------------------------------------------
     %get sampling points
@@ -148,10 +148,10 @@ while (strcmp('ACO', strategy) && dist(iter)<3040) || (strcmp('sampleOnly', stra
     end
     
     RMSE(iter) = sqrt(mean(mean((val-field(1:delta:lx,1:delta:ly)).^2)));
-    switch strategy
+    switch strategy 
         case 'ACO'
-            %errorMap= errorMap -min(errorMap(:));
-            %errorMap= errorMap./max(errorMap(:));
+            errorMap= errorMap -min(errorMap(:));
+            errorMap= errorMap./max(errorMap(:));
             %----------------------------------------------------------------------
             %compute path
             [Dh,Dv,Ddu,Ddd]=distanceMatrix(x_,y_,errorMap,px,py);
@@ -172,6 +172,23 @@ while (strcmp('ACO', strategy) && dist(iter)<3040) || (strcmp('sampleOnly', stra
             [~, idx]= max(errorMap(:));
             [row,col]= ind2sub(size(errorMap), idx);
             Pts2visit= [(col-1)*delta (row-1)*delta];
+        case 'random'
+            availablePositionMatrix= ones(lx-1,ly-1);
+            occupiedPositions= [];
+            if ~isempty(stations)
+                indX = round(stations(:,1))+1;
+                indY = round(stations(:,2))+1;
+                stationsIdxX= x(indX)+1;
+                stationsIdxY= y(indY)+1;
+                occupiedPositions = sub2ind(size(availablePositionMatrix), stationsIdxY', stationsIdxX');
+            end
+            availablePositionMatrix(occupiedPositions)= 0;
+            availablePositionIndexes= find(availablePositionMatrix== 1);
+            randIdx= randi([1,size(availablePositionIndexes,1)]);
+            availablePositionIndexes(randIdx,1);
+            [row, col]= ind2sub(size(availablePositionMatrix), availablePositionIndexes(randIdx,1));
+            Pts2visit= [(col-1) (row-1)];
+
     end
     %----------------------------------------------------------------------
     %add new sampling points
@@ -289,7 +306,7 @@ end
 
 function sVec=addSamplingPoints(sVec,X,field,x,y,lx)
 % addSamplingPoints
-% input: sVec           vector the contain the sampling values
+% input: sVec           vector that contains the sampling values
 %        X              position to  be sampled
 %        field          field value
 %        x,y            field positions
