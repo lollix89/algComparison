@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> noStations
 function plotSimulation(nRobots, folder)
 close all
 fileList=dir(strcat('./',folder,'/SimulationResultJob_*.mat'));
@@ -48,7 +44,9 @@ for i=1:nRobots
     legendNames=[legendNames; strcat(num2str(i),' robots')];
 end
 
-plotRangeX = (0:50:3000)';
+%plotRangeX = (0:50:3000)';
+plotRangeX = (1:150)';
+
 if ~exist(['./' folder '/plot'], 'dir')
     mkdir(['./' folder '/plot']);
 end

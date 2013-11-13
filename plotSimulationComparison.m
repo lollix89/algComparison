@@ -54,8 +54,8 @@ end
 legendNames{1}= 'kriging Sample';
 legendNames{2}= 'mutualInformation Sample';
 
-plotRangeX = (0:50:3000)';
-%plotRangeX= (1:150)';
+%plotRangeX = (0:50:3000)';
+plotRangeX= (1:150)';
 if ~exist(strcat('./plot', folders{1}, 'VS', folders{2}), 'dir')
     mkdir(strcat('./plot', folders{1}, 'VS', folders{2}));
 end
