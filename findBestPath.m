@@ -1,5 +1,5 @@
 function [bestPath,bestFitness]=findBestPath(x,y,S,Dh,Dv,Ddu,Ddd,maxIter,alpha,beta)
-% optimize the path of the robot in function of the kriging error using ACO
+% optimize the path of the robot in function of the error using ACO
 % input x,y                 positions of the allowable waypoints
 %       S                   starting postion of the robot
 %       Dh,Dv,Ddu,Ddd       distance matrices (horizontal,vertical,growing
@@ -12,10 +12,6 @@ function [bestPath,bestFitness]=findBestPath(x,y,S,Dh,Dv,Ddu,Ddd,maxIter,alpha,b
 lx=length(x);ly=length(y);
 
 m=15; %number of ants.
-%alpha=1;
-%beta=3;%greedy
-% alpha=0.8;
-% beta=4;
 p0=0.01; %initial pheromone concentration
 
 mu=0.01;

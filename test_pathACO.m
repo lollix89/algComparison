@@ -1,4 +1,20 @@
 function test_pathACO(algorithm, strategy)
+%%algorithm: 
+%%          -'kriging': uses the kriging error map to move around . 
+%%          -'mutualInfo': uses mutual information map to move around
+
+%%strategy: 
+%%          -"sampleOnly": samples map in the point corresponding to the maximum error.
+%%          -"ACO": uses ACO to find the path that maximizes the mean error within the path
+%%          -"greedy": similar to ACO but always chooses the path with the highest error
+%%          -"random": samples randomly in the map without considering the error
+%%          -"spiral": moves on a spiral path.
+
+
+%%oss: 
+%%      both algorithms use kriging as interpolation strategy.
+%%      when using strategy "random" or "spiral" the kind of algorithm used doesn't matter.  
+%%      for every run the position of the robot is random and so is the position of the unique static sensor.
 
 close all;
 plotOn=1;% 1 plot on, 0 : plot off
@@ -35,11 +51,7 @@ field(:,end+1)=field(:,end);
 field(end+1,:)=field(end,:);
 [Ly,Lx]=size(field);
 
-%position of the stations (static sensors)
 stations=[];
-% stations(:,1)=[24 34 14 94 134 74 94 166 186 174];
-% stations(:,2)=[166 94 22 14 86 66 174 174 106 34];
-
 
 if plotOn==1
     subplot(1,3,1);
@@ -58,7 +70,7 @@ y = 0:h:Ly-1;
 lx=length(x);
 ly=length(y);
 
-%interpolation points (points where the kriging error is computed)
+%interpolation points (points where the error is computed)
 delta=5;
 x_=0:delta:Lx-1;
 y_=0:delta:Ly-1;
@@ -73,16 +85,21 @@ lpy=length(py);
 
 %vector that contains the sampling points (nan at position non-sampled)
 sVec=ones(lx*ly,1)*nan;
-kVec=1:lx*ly;   %indices
+kVec=1:lx*ly;
 
 
 
 %parameters
-speedHeli=3.7; %volocity of the quadrotor
+speedHeli=3.7; %velocity of the quadrotor
 measPeriod=3; %sampling period
 trendOrder=0; %order of the trend function 0,1 or 2
-pos= randi([1 121]);    %initial position
-
+if strcmp('spiral',strategy)
+    pos= 1;%need to be one in 
+else
+    pos= randi([1 121]);    %initial position
+end
+%there is only one station randomly placed within Range from robot initial
+%position
 Range= 200; % range considered to compute the variogram
 posX= mod(pos-1, lpx)* ph;
 posY= floor((pos-1)/lpx)* ph;
@@ -105,7 +122,7 @@ if strcmp(algorithm, 'mutualInfo')
     
 end
 %% loop
-while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && dist(iter)<3040) || ((strcmp('sampleOnly', strategy)|| strcmp('random', strategy)) && iter <=150)
+while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy) || strcmp('spiral',strategy)) && dist(iter)<3040) || ((strcmp('sampleOnly', strategy)|| strcmp('random', strategy)) && iter <=150)
     display(iter)
     %----------------------------------------------------------------------
     %get sampling points
@@ -151,7 +168,6 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && dist(iter)<3040)
             lag=10;
             [fittedModel,fittedParam]=variogram(X,Y_,lag,Range,1);
             [val,~]=kriging(X,Y_,stdV,meanV,fittedModel,fittedParam,trendOrder,x_,y_);
-            %
             alreadySampled= [alreadySampled; XToBeSampled];
             errorMap= mutualInfo;
             
@@ -163,8 +179,6 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && dist(iter)<3040)
             %compute path
             [Dh,Dv,Ddu,Ddd]=distanceMatrix(x_,y_,errorMap,px,py);
             [path,~]=findBestPath(px,py,pos,Dh,Dv,Ddu,Ddd,nWPpath,0.6,4.4);
-            %[path, fitness]=greedy(px,py,pos,Dh,Dv,Ddu,Ddd,nWayPoints);
-            %path=computeRect(px(1),px(end),py(1),py(end),7)
             
             nP=min(nWayPoints+1,length(path));
             path=path(1:nP,:);
@@ -177,7 +191,6 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && dist(iter)<3040)
         case 'greedy'
             %compute path
             [Dh,Dv,Ddu,Ddd]=distanceMatrix(x_,y_,errorMap,px,py);
-            %[path, pos]=findShortestPath(px,py,pos,kMax,Dh,Dv);
             path=greedy(px,py,pos,Dh,Dv,Ddu,Ddd,nWPpath);
             
             nP=min(nWayPoints+1,length(path));
@@ -208,6 +221,21 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && dist(iter)<3040)
             availablePositionIndexes(randIdx,1);
             [row, col]= ind2sub(size(availablePositionMatrix), availablePositionIndexes(randIdx,1));
             Pts2visit= [(col-1) (row-1)];
+        case 'spiral'
+            len= length(px);
+            start= 1;
+            path=[];
+            while len> start
+                path= [path; px(start) py(start)];
+                path=[path; px(start+1:len)' [ones(len-start,1).* py(start)]];
+                path=[path; [ones(len-start,1).*px(len)] py(start+1:len)'];                
+                path=[path; px(len-1:-1:start)' [ones(len-start,1).*py(len)]];                
+                path=[path; [ones(len-start-1,1).*px(start)] py(len-1:-1:start+1)'];               
+                start= start+1;
+                len= len-1;
+            end
+            path= [path; px(start) py(start)];
+            [Pts2visit,dist(iter+1),h0] = findPtsAlongPath(path, speedHeli, measPeriod,dist(iter),h0);
 
     end
     %----------------------------------------------------------------------
@@ -257,10 +285,10 @@ end
 
 
 %==========================================================================
-function [Dh,Dv,Ddu,Ddd]=distanceMatrix(x_,y_,krigE,x,y)
+function [Dh,Dv,Ddu,Ddd]=distanceMatrix(x_,y_,error,x,y)
 % create the matrices that contains the distance for the ACO algorithm
 % input: x_,y_          grid positions
-%        krigE          Value of the krigE at the grid position
+%        error          Value of the error at the grid position
 %        x,y            allowable waypoints positions
 
 Dh=zeros(length(y),length(x)-1);
@@ -277,7 +305,7 @@ for i=1:length(y)
     for j=1:length(x)-1
         %Dh(i,j)=1.5-(krigE(i,j)+krigE(i,j+1));
         for k=0:n
-            Dh(i,j) = Dh(i,j) + bilinInterp(x_,y_,krigE,x(j)+k*dh,y(i),lx_1,ly_1);
+            Dh(i,j) = Dh(i,j) + bilinInterp(x_,y_,error,x(j)+k*dh,y(i),lx_1,ly_1);
         end
         %Dh(i,j) = 1.5 - (Dh(i,j)/5);
         Dh(i,j) = Dh(i,j)/(n+1);
@@ -289,7 +317,7 @@ for i=1:length(y)-1
     for j=1:length(x)
         %Dv(i,j)=1.5-(krigE(i,j)+krigE(i+1));
         for k=0:n
-            Dv(i,j) = Dv(i,j) + bilinInterp(x_,y_,krigE,x(j),y(i)+k*dh,lx_1,ly_1);
+            Dv(i,j) = Dv(i,j) + bilinInterp(x_,y_,error,x(j),y(i)+k*dh,lx_1,ly_1);
         end
         %Dv(i,j) = 1.5 - (Dv(i,j)/5);
         Dv(i,j) = Dv(i,j)/(n+1);
@@ -300,8 +328,8 @@ for i=1:length(y)-1
     for j=1:length(x)-1
         %Dv(i,j)=1.5-(krigE(i,j)+krigE(i+1));
         for k=0:n
-            Ddu(i,j) = Ddu(i,j) + bilinInterp(x_,y_,krigE,x(j)+k*dh,y(i)+k*dh,lx_1,ly_1);
-            Ddd(i,j) = Ddd(i,j) + bilinInterp(x_,y_,krigE,x(j)+k*dh,y(i+1)-k*dh,lx_1,ly_1);
+            Ddu(i,j) = Ddu(i,j) + bilinInterp(x_,y_,error,x(j)+k*dh,y(i)+k*dh,lx_1,ly_1);
+            Ddd(i,j) = Ddd(i,j) + bilinInterp(x_,y_,error,x(j)+k*dh,y(i+1)-k*dh,lx_1,ly_1);
         end
         %Dv(i,j) = 1.5 - (Dv(i,j)/5);
         Ddu(i,j) = Ddu(i,j)/(n+1);

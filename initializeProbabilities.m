@@ -5,12 +5,12 @@ function [fieldPrior, fieldPosterior,  mutualInformationMap,  temperatureVector]
             mutualInformationMap=[];
             temperatureRange=[-12,58];
             temperatureInterval= .2;
-            %---------------create temperatureVector------------------
+            %create temperatureVector------------------
             temperatureVector= (temperatureRange(1):temperatureInterval:temperatureRange(2));
-            %-------------initialize probabilities distributions----------
+            %initialize probabilities distributions----------
             fieldPrior= initializePriorDistribution(size(x_,2), size(y_,2), temperatureVector);
             fieldPosterior= fieldPrior;
-            %----------------initialize mutualInformationMap---------------
+            %initialize mutualInformationMap---------------
             mutualInformationMap= 30.*ones(size(x_,2), size(y_,2));
 end
 
