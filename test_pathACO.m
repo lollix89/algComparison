@@ -30,8 +30,8 @@ errorMap=[];
 %---------------Load a random field---------------
 if isdir('./RandomFields')
     RandStream.setGlobalStream(RandStream('mt19937ar','seed',sum(100*clock)));
-    fieldNum= randi([1 100]);
-    jobID= randi([1 3]);
+    fieldNum= 1;%randi([1 100]);
+    jobID= 1;%randi([1 3]);
     if mod(jobID, 3)== 1
         field=load(['./RandomFields/RandField_LR_No' num2str(200+fieldNum) '.csv']);
         fieldRange= 100;
@@ -100,7 +100,7 @@ else
 end
 %there is only one station randomly placed within Range from robot initial
 %position
-Range= 200; % range considered to compute the variogram
+Range= 130; % range considered to compute the variogram
 posX= mod(pos-1, lpx)* ph;
 posY= floor((pos-1)/lpx)* ph;
 aX= [max(0, floor(posX-(Range/sqrt(2)))) min(length(x)-1, floor(posX+(Range/sqrt(2))))];
@@ -122,7 +122,7 @@ if strcmp(algorithm, 'mutualInfo')
     
 end
 %% loop
-while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy) || strcmp('spiral',strategy)) && dist(iter)<3040) || ((strcmp('sampleOnly', strategy)|| strcmp('random', strategy)) && iter <=150)
+while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy) || strcmp('spiral',strategy)) && dist(iter)<3040) || ((strcmp('sampleOnly', strategy)|| strcmp('random', strategy)) && iter <=250)
     display(iter)
     %----------------------------------------------------------------------
     %get sampling points
