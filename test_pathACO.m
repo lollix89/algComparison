@@ -97,6 +97,7 @@ trendOrder=0; %order of the trend function 0,1 or 2
 if strcmp('spiral',strategy)
     pos= 1; 
 else
+    RandStream.setDefaultStream(RandStream('mt19937ar','seed',sum(100*clock)));
     pos= randi([1 121]);    %initial position
 end
 
@@ -106,6 +107,7 @@ posY= floor((pos-1)/lpx)* ph;
 aX= [max(0, floor(posX-(Range/sqrt(2)))) min(length(x)-1, floor(posX+(Range/sqrt(2))))];
 aY= [max(0, floor(posY-(Range/sqrt(2)))) min(length(y)-1, floor(posY+(Range/sqrt(2))))];
 
+RandStream.setDefaultStream(RandStream('mt19937ar','seed',sum(100*clock)));
 station= [randi(aX) randi(aY)];
 sVec=addSamplingPoints(sVec,[station; posX posY],field,x,y,lx);
 
