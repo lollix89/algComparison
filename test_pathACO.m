@@ -176,7 +176,7 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && dist(iter)<3040)
 
 
     RMSE(iter) = sqrt(mean(mean((val-field(1:delta:lx,1:delta:ly)).^2)));
-    switch strategy 
+    switch strategy
         case 'ACO'
             %compute path
             [Dh,Dv,Ddu,Ddd]=distanceMatrix(x_,y_,errorMap,px,py);
@@ -191,7 +191,6 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && dist(iter)<3040)
             pos= indX + (indY-1)*lpx;
             
             [Pts2visit,dist(iter+1),h0] = findPtsAlongPath(path, speedHeli, measPeriod,dist(iter),h0);
-
         case 'greedy'
             %compute path
             [Dh,Dv,Ddu,Ddd]=distanceMatrix(x_,y_,errorMap,px,py);
@@ -287,7 +286,7 @@ if ~exist('./results', 'dir')
 end
 
 FileName= strcat('./results/SimulationResultJob_', num2str(jobID), '.mat');
-save( FileName, 'RMSE_','algorithm','strategy','jobID');
+save( FileName, 'RMSE_','algorithm','strategy','jobID','fieldNum');
 
 end
 

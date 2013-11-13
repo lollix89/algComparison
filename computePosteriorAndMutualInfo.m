@@ -8,12 +8,12 @@ for i=1: size(X,1)
             
             currentDistance= pdist([X(i) Y(i); pointX(x_) pointY(y_)]);
 %             
-%             if currentDistance <= range
-%                 varianceFunction= .01 + (sill*(1.5*(currentDistance/range)-.5*(currentDistance/range)^3));
-%             else
-%                 varianceFunction=  .01+ sill+ 4*(sill/range)*(currentDistance-range);
-%             end
-            varianceFunction= .01 + sill*(currentDistance/range);
+            if currentDistance <= range
+                varianceFunction= .01 + (sill*(1.5*(currentDistance/range)-.5*(currentDistance/range)^3));
+            else
+                varianceFunction=  .01+ sill+ 2*(sill/range)*(currentDistance-range);
+            end
+            %varianceFunction= .01 + sill*(currentDistance/range);
             
             likelihoodCurrentCell= pdf('norm', temperatureVector, temperatureVector(closestValueIndex), varianceFunction);
             likelihoodCurrentCell= likelihoodCurrentCell./sum(likelihoodCurrentCell);
