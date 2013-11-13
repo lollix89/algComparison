@@ -101,7 +101,7 @@ else
     pos= randi([1 121]);    %initial position
 end
 
-Range= 200; % range considered to compute the variogram
+Range= 130; % range considered to compute the variogram
 posX= mod(pos-1, lpx)* ph;
 posY= floor((pos-1)/lpx)* ph;
 aX= [max(0, floor(posX-(Range/sqrt(2)))) min(length(x)-1, floor(posX+(Range/sqrt(2))))];
