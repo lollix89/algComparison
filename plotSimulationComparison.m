@@ -51,16 +51,13 @@ for j=1:ComparisonNumber
     end
 end
 
-legendNames{1}= 'kriging approach';
-legendNames{2}= 'mutualInformation approach';
+legendNames{1}= 'kriging Sample';
+legendNames{2}= 'mutualInformation Sample';
 
-<<<<<<< HEAD
 plotRangeX = (0:50:3000)';
-=======
-plotRangeX = (1:150)';
->>>>>>> noStations
-if ~exist('./plot', 'dir')
-    mkdir('./plot');
+%plotRangeX= (1:150)';
+if ~exist(strcat('./plot', folders{1}, 'VS', folders{2}), 'dir')
+    mkdir(strcat('./plot', folders{1}, 'VS', folders{2}));
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -87,7 +84,7 @@ if isempty(shortRangePlotY{1})~=1 && isempty(shortRangePlotY{2})~=1
         tmpSTD= shortRangeSTD(1:5:end,i);
         errorbar(plotRangeX(1:5:end), tmpY, tmpSTD, '.k')
     end
-    saveas(shortFigure,'./plot/shortRange','pdf')
+    saveas(shortFigure,strcat('./plot', folders{1}, 'VS', folders{2},'/shortRange'),'pdf')
     hold off
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -108,7 +105,7 @@ if isempty(mediumRangePLotY{1})~=1
         tmpSTD= mediumRangeSTD(1:5:end,i);
         errorbar(plotRangeX(1:5:end), tmpY, tmpSTD, '.k')
     end
-    saveas(mediumFigure,'./plot/mediumRange','pdf')
+    saveas(mediumFigure,strcat('./plot', folders{1}, 'VS', folders{2},'/mediumRange'),'pdf')
     hold off
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -129,7 +126,7 @@ if isempty(longRangePlotY{1})~=1
         tmpSTD= longRangeSTD(1:5:end,i);
         errorbar(plotRangeX(1:5:end), tmpY, tmpSTD, '.k')
     end
-    saveas(longFigure,'./plot/longRange','pdf')
+    saveas(longFigure,strcat('./plot', folders{1}, 'VS', folders{2},'/longRange'),'pdf')
     hold off
 end
 
