@@ -14,9 +14,9 @@ for i=1: size(X,1)
 %             end
             
             if currentDistance <= range
-                varianceFunction= .001 + (sill*(1.5*(currentDistance/range)-.5*(currentDistance/range)^3));
+                varianceFunction= .01 + (sill*(1.5*(currentDistance/range)-.5*(currentDistance/range)^3));
             else
-                varianceFunction=  sill;%+ 2*(currentDistance-range);
+                varianceFunction=  sill+ 2*(currentDistance-range);
             end
             
             likelihoodCurrentCell= pdf('norm', temperatureVector, temperatureVector(closestValueIndex), varianceFunction);
