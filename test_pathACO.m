@@ -122,7 +122,7 @@ if strcmp(algorithm, 'mutualInfo')
     
 end
 %% loop
-while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy) || strcmp('spiral',strategy)) && dist(iter)<3040) || ((strcmp('sampleOnly', strategy)|| strcmp('random', strategy)) && iter <=250)
+while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy) || strcmp('spiral',strategy)) && dist(iter)<3040) || ((strcmp('sampleOnly', strategy)|| strcmp('random', strategy)) && iter <=150)
     display(iter)
     %----------------------------------------------------------------------
     %get sampling points
