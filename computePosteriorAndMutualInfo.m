@@ -1,5 +1,5 @@
 function [prior, posterior, mutualInfo]= computePosteriorAndMutualInfo(prior, posterior, mutualInfo, temperatureVector, FValues, X, Y, pointX, pointY, range)
-sill= 1;
+sill= 10;
 for i=1: size(X,1)
     [~, closestValueIndex] = min(abs(temperatureVector- FValues(i)));
     
@@ -14,9 +14,9 @@ for i=1: size(X,1)
 %             end
             
             if currentDistance <= range
-                varianceFunction= .001 + (sill*(1.5*(currentDistance/range)-.5*(currentDistance/range)^3));
+                varianceFunction= .01 + (sill*(1.5*(currentDistance/range)-.5*(currentDistance/range)^3));
             else
-                varianceFunction=  sill;%+ 2*(currentDistance-range);
+                varianceFunction=  sill+ 2*(currentDistance-range);
             end
             
             likelihoodCurrentCell= pdf('norm', temperatureVector, temperatureVector(closestValueIndex), varianceFunction);
