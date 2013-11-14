@@ -13,7 +13,6 @@ shortRange=cell(ComparisonNumber,nRobots);
 mediumRange=cell(ComparisonNumber,nRobots);
 longRange=cell(ComparisonNumber,nRobots);
 
-%assume L.currentRMSE is a column vector
 for j=1: ComparisonNumber
     for i=1:length(fileList{j})
         L=load(strcat('./', folders{j},'/', fileList{j}(i).name));
@@ -35,8 +34,6 @@ mediumRangeSTD= cell(1,ComparisonNumber);
 longRangePlotY= cell(1,ComparisonNumber);
 longRangeSTD= cell(1,ComparisonNumber);
 
-legendNames= {};
-
 for j=1:ComparisonNumber
     for i=1:nRobots
         shortRangePlotY{j}= [shortRangePlotY{j} mean(shortRange{j,i},2)];
@@ -51,21 +48,22 @@ for j=1:ComparisonNumber
     end
 end
 
-legendNames{1}= 'kriging Sample';
-legendNames{2}= 'mutualInformation Sample';
+destFolderName= 'comparison-';
+for i=1:ComparisonNumber
+   destFolderName= strcat(destFolderName, folders{i});
+end
 
-%plotRangeX = (0:50:3000)';
-plotRangeX= (1:150)';
-if ~exist(strcat('./plot', folders{1}, 'VS', folders{2}), 'dir')
-    mkdir(strcat('./plot', folders{1}, 'VS', folders{2}));
+
+plotRangeX = (0:50:3000)';
+%plotRangeX= (1:150)';
+plotRangeXBar= repmat(plotRangeX(1:10:end), 1, ComparisonNumber);
+
+if ~exist(strcat('./', destFolderName), 'dir')
+    mkdir(strcat('./', destFolderName));
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if isempty(shortRangePlotY{1})~=1 && isempty(shortRangePlotY{2})~=1
-    
-    size(shortRangePlotY{1})
-    size(shortRangePlotY{2})
-    size(plotRangeX)
     
     shortRangePlotY= cell2mat(shortRangePlotY);
     shortRangeSTD= cell2mat(shortRangeSTD);
@@ -74,17 +72,16 @@ if isempty(shortRangePlotY{1})~=1 && isempty(shortRangePlotY{2})~=1
     plot(plotRangeX,shortRangePlotY)
     title('ShortRange RandomField comparison')
     ylabel('RMSE')
-    xlabel('meters')
+    xlabel('sample')
     grid on
-    legend(legendNames)
+    legend(folders)
     hold on
-    %adding error bars for STD
-    for i=1:ComparisonNumber
-        tmpY= shortRangePlotY(1:5:end,i);
-        tmpSTD= shortRangeSTD(1:5:end,i);
-        errorbar(plotRangeX(1:5:end), tmpY, tmpSTD, '.k')
-    end
-    saveas(shortFigure,strcat('./plot', folders{1}, 'VS', folders{2},'/shortRange'),'pdf')
+%     
+    tmpY= shortRangePlotY(1:10:end,:);
+    tmpSTD= shortRangeSTD(1:10:end,:);
+    errorbar(plotRangeXBar, tmpY, tmpSTD, '.')
+
+    saveas(shortFigure,strcat('./', destFolderName,'/shortRange'),'pdf')
     hold off
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -95,17 +92,17 @@ if isempty(mediumRangePLotY{1})~=1
     plot(plotRangeX,mediumRangePLotY)
     title('MediumRange RandomField comparison')
     ylabel('RMSE')
-    xlabel('meters')
+    xlabel('sample')
     grid on
-    legend(legendNames)
+    legend(folders)
     hold on
-    %adding error bars for STD
-    for i=1:ComparisonNumber
-        tmpY= mediumRangePLotY(1:5:end,i);
-        tmpSTD= mediumRangeSTD(1:5:end,i);
-        errorbar(plotRangeX(1:5:end), tmpY, tmpSTD, '.k')
-    end
-    saveas(mediumFigure,strcat('./plot', folders{1}, 'VS', folders{2},'/mediumRange'),'pdf')
+    
+    tmpY= mediumRangePLotY(1:10:end,:);
+    tmpSTD= mediumRangeSTD(1:10:end,:);
+    %plotRangeX= repmat(plotRangeX(1:5:end), 1, ComparisonNumber);
+    errorbar(plotRangeXBar, tmpY, tmpSTD, '.')
+    
+    saveas(mediumFigure,strcat('./', destFolderName,'/mediumRange'),'pdf')
     hold off
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -116,17 +113,17 @@ if isempty(longRangePlotY{1})~=1
     plot(plotRangeX,longRangePlotY)
     title('longRange RandomField comparison')
     ylabel('RMSE')
-    xlabel('meters')
+    xlabel('sample')
     grid on
-    legend(legendNames)
+    legend(folders)
     hold on
-    %adding error bars for STD
-    for i=1:ComparisonNumber
-        tmpY= longRangePlotY(1:5:end,i);
-        tmpSTD= longRangeSTD(1:5:end,i);
-        errorbar(plotRangeX(1:5:end), tmpY, tmpSTD, '.k')
-    end
-    saveas(longFigure,strcat('./plot', folders{1}, 'VS', folders{2},'/longRange'),'pdf')
+
+    tmpY= longRangePlotY(1:10:end,:);
+    tmpSTD= longRangeSTD(1:10:end,:);
+    %plotRangeX= repmat(plotRangeX(1:5:end), 1, ComparisonNumber);
+    errorbar(plotRangeXBar, tmpY, tmpSTD, '.')
+    
+    saveas(longFigure,strcat('./', destFolderName,'/longRange'),'pdf')
     hold off
 end
 
