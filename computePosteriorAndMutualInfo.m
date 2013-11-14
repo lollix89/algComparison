@@ -7,12 +7,44 @@ for i=1: size(X,1)
         for y_=1:size(pointY,2)
             
             currentDistance= pdist([X(i) Y(i); pointX(x_) pointY(y_)]);
-%             
+           
+
+            %spherical with coefficient 0.5
+%             if currentDistance <= range
+%                 varianceFunction= .01 + (sill*(1.5*(currentDistance/range)-.5*(currentDistance/range)^3));
+%             else
+%                 varianceFunction=  .01+ sill+ .5*(sill/range)*(currentDistance-range);
+%             end
+                
+            %spherical with coefficient 1
             if currentDistance <= range
                 varianceFunction= .01 + (sill*(1.5*(currentDistance/range)-.5*(currentDistance/range)^3));
             else
-                varianceFunction=  .01+ sill+ 2*(sill/range)*(currentDistance-range);
+                varianceFunction=  .01+ sill+ (sill/range)*(currentDistance-range);
             end
+            
+            %spherical with coefficient 2
+%             if currentDistance <= range
+%                 varianceFunction= .01 + (sill*(1.5*(currentDistance/range)-.5*(currentDistance/range)^3));
+%             else
+%                 varianceFunction=  .01+ sill+ 2*(sill/range)*(currentDistance-range);
+%             end
+            
+            %spherical with coefficient 4
+%             if currentDistance <= range
+%                 varianceFunction= .01 + (sill*(1.5*(currentDistance/range)-.5*(currentDistance/range)^3));
+%             else
+%                 varianceFunction=  .01+ sill+ 4*(sill/range)*(currentDistance-range);
+%             end
+
+            %spherical with constant
+%             if currentDistance <= range
+%                 varianceFunction= .01 + (sill*(1.5*(currentDistance/range)-.5*(currentDistance/range)^3));
+%             else
+%                 varianceFunction=  .01+ sill;
+%             end
+            
+            %linear
             %varianceFunction= .01 + sill*(currentDistance/range);
             
             likelihoodCurrentCell= pdf('norm', temperatureVector, temperatureVector(closestValueIndex), varianceFunction);

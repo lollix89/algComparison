@@ -22,8 +22,8 @@ plotOn=0;
 
 % a path of nWPpath waypoints is recomputed each time the robot reaches
 % nWayPoints waypoints
-nWayPoints=5;% number of waypoints to reach before recomputing the path
-nWPpath=10;% number of waypoints in the path
+nWayPoints=20;% number of waypoints to reach before recomputing the path
+nWPpath=40;% number of waypoints in the path
 alreadySampled=[];
 errorMap=[];
 
@@ -77,7 +77,7 @@ x_=0:delta:Lx-1;
 y_=0:delta:Ly-1;
 
 %allowable waypoints position
-ph = 20;
+ph = 5;
 px = 0:ph:Lx-1;
 py = 0:ph:Ly-1;
 lpx=length(px);
