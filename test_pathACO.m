@@ -17,7 +17,7 @@ function test_pathACO(jobID, algorithm, strategy)
 %%      for every run the position of the robot is random and so is the position of the unique static sensor.
 
 close all;
-plotOn=0;
+plotOn=1;
 
 
 % a path of nWPpath waypoints is recomputed each time the robot reaches
@@ -195,7 +195,11 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && dist(iter)<3040)
     RMSE(iter) = sqrt(mean(mean((val-field(1:delta:lx,1:delta:ly)).^2)));    
     switch strategy
         case 'ACO'
-            %compute path
+            %compute path normalize between [0,1.5]
+            range = max(errorMap(:)) - min(errorMap(:));
+            errorMap = (errorMap - min(errorMap(:))) ./ range;
+            range2 = 1.5;
+            errorMap = (errorMap.* range2);
             [Dh,Dv,Ddu,Ddd]=distanceMatrix(x_,y_,errorMap,px,py);
             [path,~]=findBestPath(px,py,pos,Dh,Dv,Ddu,Ddd,nWPpath,0.6,4.4);
             
