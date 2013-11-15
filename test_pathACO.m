@@ -118,11 +118,28 @@ dist(iter)=0; %traveled distance
 h0=0; % distance traveld by the quadrotor since the last waypoint
 
 if strcmp(algorithm, 'mutualInfo')
-    [prior,posterior,mutualInfo, temperatureVector]= initializeProbabilities(x_,y_);
-    
+    [prior,posterior,mutualInfo, temperatureVector]= initializeProbabilities(x_,y_); 
 end
+if strcmp(strategy, 'spiral')
+    len= length(px);
+    start= 1;
+    spiralPath=[];
+    while len> start
+        spiralPath= [spiralPath; px(start) py(start)];
+        spiralPath=[spiralPath; px(start+1:len)' [ones(len-start,1).* py(start)]];
+        spiralPath=[spiralPath; [ones(len-start,1).*px(len)] py(start+1:len)'];
+        spiralPath=[spiralPath; px(len-1:-1:start)' [ones(len-start,1).*py(len)]];
+        spiralPath=[spiralPath; [ones(len-start-1,1).*px(start)] py(len-1:-1:start+1)'];
+        start= start+1;
+        len= len-1;
+    end
+    spiralPath= [spiralPath; px(start) py(start)];
+end
+
 %% loop
-while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy) || strcmp('spiral',strategy)) && dist(iter)<3040) || ((strcmp('sampleOnly', strategy)|| strcmp('random', strategy)) && iter <=150)
+while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && dist(iter)<3040) ...
+        || ((strcmp('sampleOnly', strategy)|| strcmp('random', strategy)) && iter <=150)...
+        ||  (strcmp('spiral',strategy) && size(spiralPath,1) > 1)
     display(iter)
     %----------------------------------------------------------------------
     %get sampling points
@@ -222,20 +239,13 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy) || strcmp('spiral',s
             [row, col]= ind2sub(size(availablePositionMatrix), availablePositionIndexes(randIdx,1));
             Pts2visit= [(col-1) (row-1)];
         case 'spiral'
-            len= length(px);
-            start= 1;
-            path=[];
-            while len> start
-                path= [path; px(start) py(start)];
-                path=[path; px(start+1:len)' [ones(len-start,1).* py(start)]];
-                path=[path; [ones(len-start,1).*px(len)] py(start+1:len)'];                
-                path=[path; px(len-1:-1:start)' [ones(len-start,1).*py(len)]];                
-                path=[path; [ones(len-start-1,1).*px(start)] py(len-1:-1:start+1)'];               
-                start= start+1;
-                len= len-1;
+            if size(spiralPath,1)>= nWayPoints
+                path= spiralPath(1:nWayPoints,:);
+            else
+                path= spiralPath(1:end,:);
             end
-            path= [path; px(start) py(start)];
             [Pts2visit,dist(iter+1),h0] = findPtsAlongPath(path, speedHeli, measPeriod,dist(iter),h0);
+            spiralPath= spiralPath(size(path,1)+1:end,:);
 
     end
     %----------------------------------------------------------------------
@@ -272,6 +282,9 @@ end
 if strcmp(strategy, 'ACO')
     dist=dist(1:end-1);
     RMSE_=interp1(dist,RMSE,0:50:3000,'linear','extrap');
+elseif strcmp(strategy,'spiral')
+    dist= dist(1:end-1);
+    RMSE_=interp1(dist,RMSE,0:50:dist(end),'linear','extrap');
 else
     RMSE_= RMSE;
 end
