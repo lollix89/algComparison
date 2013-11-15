@@ -17,13 +17,13 @@ function test_pathACO(jobID, algorithm, strategy)
 %%      for every run the position of the robot is random and so is the position of the unique static sensor.
 
 close all;
-plotOn=1;
+plotOn=0;
 
 
 % a path of nWPpath waypoints is recomputed each time the robot reaches
 % nWayPoints waypoints
-nWayPoints=20;% number of waypoints to reach before recomputing the path
-nWPpath=40;% number of waypoints in the path
+nWayPoints=40;% number of waypoints to reach before recomputing the path
+nWPpath=20;% number of waypoints in the path
 alreadySampled=[];
 errorMap=[];
 
