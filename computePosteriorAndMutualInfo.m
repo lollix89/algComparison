@@ -17,11 +17,11 @@ for i=1: size(X,1)
 %             end
                 
             %spherical with coefficient 1
-            if currentDistance <= range
-                varianceFunction= .01 + (sill*(1.5*(currentDistance/range)-.5*(currentDistance/range)^3));
-            else
-                varianceFunction=  .01+ sill+ (sill/range)*(currentDistance-range);
-            end
+%            if currentDistance <= range
+%                varianceFunction= .01 + (sill*(1.5*(currentDistance/range)-.5*(currentDistance/range)^3));
+%            else
+%                varianceFunction=  .01+ sill+ (sill/range)*(currentDistance-range);
+%            end
             
             %spherical with coefficient 2
 %             if currentDistance <= range
@@ -38,11 +38,11 @@ for i=1: size(X,1)
 %             end
 
             %spherical with constant
-%             if currentDistance <= range
-%                 varianceFunction= .01 + (sill*(1.5*(currentDistance/range)-.5*(currentDistance/range)^3));
-%             else
-%                 varianceFunction=  .01+ sill;
-%             end
+             if currentDistance <= range
+                 varianceFunction= .01 + (sill*(1.5*(currentDistance/range)-.5*(currentDistance/range)^3));
+             else
+                 varianceFunction=  .01+ sill;
+             end
             
             %linear
             %varianceFunction= .01 + sill*(currentDistance/range);
