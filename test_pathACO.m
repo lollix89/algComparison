@@ -212,7 +212,7 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && dist(iter)<3040)
         case 'greedy'
             %compute path
             [Dh,Dv,Ddu,Ddd]=distanceMatrix(x_,y_,errorMap,px,py);
-            path=greedy(px,py,pos,Dh,Dv,Ddu,Ddd,nWPpath);
+            path= greedy(px,py,pos,Dh,Dv,Ddu,Ddd,nWPpath);
             
             nP=min(nWayPoints+1,length(path));
             path=path(1:nP,:);
@@ -281,9 +281,10 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && dist(iter)<3040)
         drawnow
         hold off
     end
+    %F(iter) = getframe;
     iter=iter+1;
 end
-if strcmp(strategy, 'ACO')
+if strcmp(strategy, 'ACO') || strcmp(strategy,'greedy')
     dist=dist(1:end-1);
     RMSE_=interp1(dist,RMSE,0:50:3000,'linear','extrap');
 elseif strcmp(strategy,'spiral')
@@ -298,6 +299,7 @@ for i=1:length(RMSE_)
 end
 fprintf(fid,'\n');
 fclose(fid);
+%movie2avi(F, 'movie.avi', 'compression','None', 'fps',0.5);
 end
 
 
