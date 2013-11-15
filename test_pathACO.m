@@ -286,7 +286,7 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && dist(iter)<3040)
     end
     iter=iter+1;
 end
-if strcmp(strategy, 'ACO')
+if strcmp(strategy, 'ACO') || strcmp(strategy, 'greedy')
     dist=dist(1:end-1);
     RMSE_=interp1(dist,RMSE,0:50:3000,'linear','extrap');
 elseif strcmp(strategy,'spiral')
