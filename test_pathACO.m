@@ -139,7 +139,7 @@ if strcmp(strategy, 'spiral')
 end
 
 %% loop
-while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && dist(iter)<3040) || ((strcmp('sampleOnly', strategy)...
+while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && dist(iter)<6040) || ((strcmp('sampleOnly', strategy)...
         || strcmp('random', strategy)) && iter <=150)...
         ||  (strcmp('spiral',strategy) && size(spiralPath,1) > 1)
 
@@ -288,7 +288,7 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && dist(iter)<3040)
 end
 if strcmp(strategy, 'ACO') || strcmp(strategy, 'greedy')
     dist=dist(1:end-1);
-    RMSE_=interp1(dist,RMSE,0:50:3000,'linear','extrap');
+    RMSE_=interp1(dist,RMSE,0:50:6000,'linear','extrap');
 elseif strcmp(strategy,'spiral')
     dist= dist(1:end-1)
     RMSE_=interp1(dist,RMSE,0:50:dist(end),'linear','extrap');
