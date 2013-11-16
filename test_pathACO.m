@@ -33,10 +33,10 @@ if isdir('./RandomFields')
     fieldNum= randi([1 100]);
     if mod(jobID, 3)== 1
         field=load(['./RandomFields/RandField_LR_No' num2str(200+fieldNum) '.csv']);
-        fieldRange= 100;
+        fieldRange= 40;
     elseif mod(jobID,3)== 2
         field=load(['./RandomFields/RandField_IR_No' num2str(100+fieldNum) '.csv']);
-        fieldRange= 50;
+        fieldRange= 20;
     else
         field=load(['./RandomFields/RandField_SR_No' num2str(fieldNum) '.csv']);
         fieldRange= 10;
@@ -372,7 +372,7 @@ set(gca,'FontSize',16)
 %ylabel('Y [m]','FontSize', 14)
 %colorbar
 axis('equal')
-axis([-3 203 -3 203])
+axis([-3 303 -3 303])
 end
 
 function sVec=addSamplingPoints(sVec,X,field,x,y,lx)
