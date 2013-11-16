@@ -34,10 +34,10 @@ if isdir('./RandomFields')
     jobID= 1;%randi([1 3]);
     if mod(jobID, 3)== 1
         field=load(['./RandomFields/RandField_LR_No' num2str(200+fieldNum) '.csv']);
-        fieldRange= 100;
+        fieldRange= 40;
     elseif mod(jobID,3)== 2
         field=load(['./RandomFields/RandField_IR_No' num2str(100+fieldNum) '.csv']);
-        fieldRange= 50;
+        fieldRange= 20;
     else
         field=load(['./RandomFields/RandField_SR_No' num2str(fieldNum) '.csv']);
         fieldRange= 10;
