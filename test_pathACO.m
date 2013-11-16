@@ -62,6 +62,7 @@ if plotOn==1
     end
     drawnow
 end
+size(field)
 
 %grid used to save the measures
 h = 1;
@@ -368,7 +369,7 @@ set(gca,'FontSize',16)
 %ylabel('Y [m]','FontSize', 14)
 %colorbar
 axis('equal')
-axis([-3 203 -3 203])
+axis([-3 303 -3 303])
 end
 
 function sVec=addSamplingPoints(sVec,X,field,x,y,lx)
