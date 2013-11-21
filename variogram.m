@@ -18,14 +18,14 @@ function [fittedModel,fittedParam,best_RMSE]=variogram(X,Y,lag,range,var)
 [fittedModel, fittedParam, best_RMSE] = adjust_vario(lags,varioVal, var);
 
 % %Plot fitted variogram
-% 
-%     figure
-%     plot(lags,varioVal, 'ok','MarkerFaceColor','b');hold on
-%     h_mod=linspace(0, range,100);
-%     plot(h_mod,fittedModel(fittedParam,h_mod),'k-','linewidth',2)
-%     set(gca,'FontSize',16)
-%     xlabel('distance (m)')
-%     ylabel('semi-variogram')
-%     hold off
+
+    figure
+    plot(lags,varioVal, 'ok','MarkerFaceColor','b');hold on
+    h_mod=linspace(0, range,100);
+    plot(h_mod,fittedModel(fittedParam,h_mod),'k-','linewidth',2)
+    set(gca,'FontSize',16)
+    xlabel('distance (m)')
+    ylabel('semi-variogram')
+    hold off
 
 end

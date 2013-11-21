@@ -2,7 +2,7 @@
 require(RandomFields)
 
 
-setwd(getwd()) # Chemin à indiquer correctement
+setwd(getwd()) 
 fieldType <-c("SR", "IR", "LR")
 fieldQuantity= 100
 

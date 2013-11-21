@@ -27,7 +27,6 @@ if(~isempty(range))
     range = range(1);
 else
     range=h((vario>0.9*max(vario))); % If we don't reach the estimated sill, juste take 90% of max
-    %range=range(1);
 end
 
 % 
