@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ $# -ne 3 ]; then
+	echo "Usage: cleanjob jobid output inputdir" >&2
+	exit 2
+fi
+
+qsub -hold_jid $1 -N "cleanup-$1" ./scripts/clean.sub "$2" "$3"
