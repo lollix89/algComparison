@@ -27,30 +27,20 @@ nWPpath=10;% number of waypoints in the path
 alreadySampled=[];
 errorMap=[];
 
-%---------------Load a random field---------------
-if isdir('./RandomFields')
-    RandStream.setGlobalStream(RandStream('mt19937ar','seed',sum(100*clock)));
-    fieldNum= 1;%randi([1 100]);
-    jobID= 1;%randi([1 3]);
-    if mod(jobID, 3)== 1
-        field=load(['./RandomFields/RandField_LR_No' num2str(200+fieldNum) '.csv']);
-        fieldRange= 40;
-    elseif mod(jobID,3)== 2
-        field=load(['./RandomFields/RandField_IR_No' num2str(100+fieldNum) '.csv']);
-        fieldRange= 20;
-    else
-        field=load(['./RandomFields/RandField_SR_No' num2str(fieldNum) '.csv']);
-        fieldRange= 10;
-    end
+%---------------Generate a random field---------------
+RandStream.setGlobalStream(RandStream('mt19937ar','seed',sum(100*clock)));
+fieldNum= 1;%randi([1 100]);
+jobID= 1;%randi([1 3]);
+if mod(jobID, 3)== 1
+    fieldRange= 40;
+elseif mod(jobID,3)== 2
+    fieldRange= 20;
 else
-    error('Directory does not exist!!!')
+    fieldRange= 10;
 end
+field=fields.gaussian.generate('spherical',300,1,[25 25 0 fieldRange]);
 
-%we want a field of 200x200 m. (not 199x199)
-field(:,end+1)=field(:,end);
-field(end+1,:)=field(end,:);
 [Ly,Lx]=size(field);
-
 stations=[];
 
 if plotOn==1
