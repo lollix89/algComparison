@@ -15,8 +15,6 @@ function [measPts,dist,hend] = findPtsAlongPath(coords,speed,measPeriod,dist,h0)
 
 
 h=speed*measPeriod;%sampling distance
-%nMeasPts=floor(totDist/h)%number of measurment points
-%measPts=zeros(nMeasPts,2);
 
 %part of the measurment distance astride two intervals, initialy = h since
 %we don't want to take the initial position as a measurment point
@@ -33,7 +31,7 @@ for i=1:length(coords)-1 %loop over the path positions
         m=m+1;
         k=k+1;
     end
-    offset=offset+k*h-l;%new offset
+    offset=offset+k*h-l;    %new offset
 end
 
 hend=offset;

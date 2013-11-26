@@ -17,7 +17,7 @@ function test_pathACO(algorithm, strategy)
 %%      for every run the position of the robot is random and so is the position of the unique static sensor.
 
 close all;
-plotOn=1;% 1 plot on, 0 : plot off
+plotOn=1;
 
 
 % a path of nWPpath waypoints is recomputed each time the robot reaches
@@ -78,29 +78,29 @@ lpy=length(py);
 sVec=ones(lx*ly,1)*nan;
 kVec=1:lx*ly;
 
-
-
 %parameters
-speedHeli=3.7; %velocity of the quadrotor
-measPeriod=3; %sampling period
-trendOrder=0; %order of the trend function 0,1 or 2
+speedHeli= 3.7; %velocity of the quadrotor
+measPeriod= 3; %sampling period
+trendOrder= 0; %order of the trend function 0,1 or 2
 if strcmp('spiral',strategy)
     pos= 1;%need to be one in 
 else
-    pos= randi([1 121]);    %initial position
+    pos= 20;%randi([1 121]);    %initial position
 end
 %there is only one station randomly placed within Range from robot initial
 %position
 Range= 130; % range considered to compute the variogram
 posX= mod(pos-1, lpx)* ph;
 posY= floor((pos-1)/lpx)* ph;
+%static station must be in Range within the robot position or it s not
+%possible to compute the kriging interpolation
 aX= [max(0, floor(posX-(Range/sqrt(2)))) min(length(x)-1, floor(posX+(Range/sqrt(2))))];
 aY= [max(0, floor(posY-(Range/sqrt(2)))) min(length(y)-1, floor(posY+(Range/sqrt(2))))];
 
 station= [randi(aX) randi(aY)];
-sVec=addSamplingPoints(sVec,[station; posX posY],field,x,y,lx);
+sVec= addSamplingPoints(sVec,[station; posX posY],field,x,y,lx);
 
-fid = fopen('./test.txt','w');%open output file
+fid = fopen('./test.txt','w'); %open output file
 
 iter=1;
 dist=[];%traveled distance
@@ -168,7 +168,6 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && dist(iter)<3040)
                 YToBeSampled= Y;
             end
             [prior, posterior, mutualInfo]= computePosteriorAndMutualInfo(prior, posterior, mutualInfo, temperatureVector, YToBeSampled, XToBeSampled(:,2), XToBeSampled(:,1), y_, x_, fieldRange);
-            %val= sampleTemperatureProbability( posterior, temperatureVector, X(:,2), X(:,1), Y, delta);
             %using kriging as interpolation algorithm
             meanV=mean(Y);
             stdV=std(Y);
@@ -201,18 +200,22 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && dist(iter)<3040)
             
             [Pts2visit,dist(iter+1),h0] = findPtsAlongPath(path, speedHeli, measPeriod,dist(iter),h0);
         case 'greedy'
-            %compute path
-            [Dh,Dv,Ddu,Ddd]=distanceMatrix(x_,y_,errorMap,px,py);
-            path= greedy(px,py,pos,Dh,Dv,Ddu,Ddd,nWPpath);
+            %First interpolate the conditional entropy map H(X|Y) 
+            %then choose the greediest direction according to the mean
+            %error.
+            Map= nan(lx,ly);
+            Map(x_+1,y_+1)= errorMap; 
+            Map= interpolate(Map);
             
-            nP=min(nWayPoints+1,length(path));
-            path=path(1:nP,:);
+            arrivalPnt= greedy(posX+1,posY+1, Lx, Ly, speedHeli, Map, 8); 
             
-            indX = floor(path(end,1)/ph)+1;
-            indY = floor(path(end,2)/ph)+1;
-            pos= indX + (indY-1)*lpx;
+            %%debugged until here
             
-            [Pts2visit,dist(iter+1),h0] = findPtsAlongPath(path, speedHeli, measPeriod,dist(iter),h0);
+            path= [posX posY; arrivalPnt-1 ];
+            
+            pos= arrivalPnt(1) + (arrivalPnt(2)-1)*Lx;
+            
+            [Pts2visit,dist(iter+1),h0] = findPtsAlongPath(path, speedHeli, measPeriod, dist(iter),h0);
         case 'sampleOnly'
             [~, idx]= max(errorMap(:));
             [row,col]= ind2sub(size(errorMap), idx);
@@ -355,9 +358,6 @@ function plotmap(x,y,map)
 [~, ch]=contourf(x,y,map,30);
 set(ch,'edgecolor','none');
 set(gca,'FontSize',16)
-%xlabel('X [m]','FontSize',14)
-%ylabel('Y [m]','FontSize', 14)
-%colorbar
 axis('equal')
 axis([-3 303 -3 303])
 end
