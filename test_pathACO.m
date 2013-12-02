@@ -17,7 +17,7 @@ function test_pathACO(algorithm, strategy)
 %%      for every run the position of the robot is random and so is the position of the unique static sensor.
 
 close all;
-plotOn=1;
+plotOn=0;
 
 %---------------Generate a random field---------------
 RandStream.setGlobalStream(RandStream('mt19937ar','seed',sum(100*clock)));
@@ -54,10 +54,8 @@ grid= nan(Lx,Ly);
 
 posX= randi([1 300]);
 posY= randi([1 300]);
-posX= 300;
-posY= 300;
 speedHeli= 3.7;
-allowableDirections= 8;
+allowableDirections= 9;
 horizon= 20;
 measPeriod= 3;
 distance=0;
