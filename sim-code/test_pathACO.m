@@ -21,6 +21,7 @@ plotOn=0;
 
 %---------------Generate a random field---------------
 field=fields.gaussian.generate('spherical',300,1,[25 25 0 qrs.config('FieldRange')]);
+fieldRange= qrs.config('FieldRange');
 [Ly,Lx]=size(field);
 
 %points where the error is computed

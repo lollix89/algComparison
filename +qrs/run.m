@@ -14,6 +14,6 @@ else
 end
 
 % add legacy code to path
-addpath('old');
+addpath('sim-code');
 
 test_pathACO(qrs.config('Algorithm'),qrs.config('Strategy'));
