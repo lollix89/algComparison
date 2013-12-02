@@ -1,4 +1,4 @@
-function [A, rcondA] = generateKrigMatrix(X, varioModel, modelParam, trendOrder)
+function [A] = generateKrigMatrix(X, varioModel, modelParam, trendOrder)
 %generateKrigMatrix Creates kriging matrix based on variogram model
 %   Creates the kriging matrix by using the coordinates of the points, a
 %   handle to a valid variogram model, its parameters and a trend of
@@ -41,10 +41,6 @@ elseif (trendOrder==2)
     A(1:Nmeasures,Nmeasures+6)=X(:,2).*X(:,2); 
 end
 A=A+triu(A)';
-
-% Reciprocal of conditionning number, if close to working precision : high
-% risk of singularity.
-rcondA=rcond(A);
 
 end
 

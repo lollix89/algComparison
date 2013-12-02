@@ -1,4 +1,4 @@
-function [best_model, best_param, best_RMSE] = adjust_vario(h, vario, var)
+function [best_model, best_param, best_RMSE] = adjust_vario(h, vario)
 %ADJUST_VARIO Key function of the variogram fitting
 %   This function declares all valid variogram models, determines
 %   approximations of initial parameters and tries all different variogram
@@ -17,17 +17,14 @@ function [best_model, best_param, best_RMSE] = adjust_vario(h, vario, var)
 nugget=0;
 
 %inital value of the sill
-%sill = var;%valeur assymptotique th?oriquement ?gale ? la variance
 sill=(max(vario)+mean(vario))/2;
-%sill=var;
-%sill = polyval(polyfit(h,vario,1),120);
+
 %initial value of the range
 range = h((vario>0.9*sill));
 if(~isempty(range))
     range = range(1);
 else
     range=h((vario>0.9*max(vario))); % If we don't reach the estimated sill, juste take 90% of max
-    %range=range(1);
 end
 
 % 
@@ -81,8 +78,6 @@ for i=1:1%length(models_handles)
         param0=[nugget,sill,range];
         param0=[sill,range];
        [fitted_param, RMSE, ]=fitvario2(h, vario, param0, models_handles{i},W);
-       %RMSE=1;
-       %fitted_param=param0;
     elseif(isequal(models_handles{i},expo))
         param0=[nugget,sill,range];
         [fitted_param, RMSE]=fitvario(h, vario, param0, models_handles{i},W);
@@ -99,14 +94,7 @@ for i=1:1%length(models_handles)
        best_model=models_handles{i};
        best_param=fitted_param;
    end 
-end%=======================================================================
+end
 
-% Check if variogram model is an increasing function
-% otherwise something is wrong, in that cas adjust a simple linear
-% model instead after removing outliers.
-% if(best_model(best_param, h(1))>best_model(best_param,h(end)))
-%   best_model=pow;
-%   best_param=[0, (max(vario)-min(vario))/h(end), 1];
-% end
 
 end

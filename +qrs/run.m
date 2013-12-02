@@ -13,6 +13,7 @@ else
 	qrs.r.init;
 end
 
-randi(100000)
+% add legacy code to path
+addpath('old');
 
-% TODO: run simulation here
+test_pathACO(qrs.config('Algorithm'),qrs.config('Strategy'));

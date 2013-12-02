@@ -2,25 +2,25 @@ function [meanDist, vario] = computeRobustVario(range, lag, X, Y)
 %computeRobustVario This function computes the Cressie and Hawkins
 %variogram estimator
 
-% INPUT : 
+% INPUT  
 %  range : (maximal distance between two points for them to be 
 %          considered in the calculation)
 %  lag   : distance lag [m], the semivariances corresponding to the 
 %          following distance lags intervals will be computed :
 %          0,1*lag,2*lag,...,j*lag,...,range
-%  X : vector (Nx2) of coordinates (x1,x2) of the sampling points
-%  Y : vector (Nx1) of the values at the measurement points
+%  X     : vector (Nx2) of coordinates (x,y) of the sampling points
+%  Y     : vector (Nx1) of the values at the measurement points
 
 % OUTPUT : 
-%  meanDist = Mean distance lags inside each lag interval
-%  vario    = median of the semivariances inside each lag interval
+%  meanDist  : Mean distance lags inside each lag interval
+%  vario     : median of the semivariances inside each lag interval
 
 
-nMeasures=length(Y);
-nLags=ceil(range/lag);
-vario=zeros(nLags,1);
-meanDist=zeros(nLags,1);
-nMeasuresPerLag=zeros(1,nLags);
+nMeasures= length(Y);
+nLags= ceil(range/lag);
+vario= zeros(nLags,1);
+meanDist= zeros(nLags,1);
+nMeasuresPerLag= zeros(1,nLags);
 
 % %loop over the pair of measurment points
 bin=cell(nLags,1);

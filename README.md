@@ -70,4 +70,16 @@ Simulation parameters are passed directly to qrs.run.
 
 ### RandomSeed
 
-Integer. Optional parameter. Fixes the random seed for the simulation to the specified value
+Integer. Optional. Fixes the random seed for the simulation to the specified value.
+
+### Algorithm
+
+String. Required. mutualInfo or kriging
+
+### Strategy
+
+String. Required. ACO or greedy
+
+### FieldRange
+
+Integer. Required. Correlation range of generated random field.
