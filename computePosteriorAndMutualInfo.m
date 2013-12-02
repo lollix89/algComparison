@@ -1,37 +1,61 @@
-function [prior, posterior, mutualInfo]= computePosteriorAndMutualInfo(prior, posterior, mutualInfo, temperatureVector, FValues, X, Y, pointX, pointY, range)
+function [prior, posterior, mutualInfo]= computePosteriorAndMutualInfo(prior, posterior, mutualInfo, temperatureV, samples, coords, range, delta)
+
+% update the posterior for every cell given the current samples and update
+% conditional entropy H(X|Y).
+
+% INPUT
+% prior          : grid of the prior 
+% posterior      : grid of the posterior
+% mutualInfo     : grid of the muutal information
+% temperatureV   : the vector of temperatures
+% samples        : samples of current iteration
+% coords         : coordinates of the smapling points given as x(columns),
+%                   y(rows) Nx2
+% range          : correlation range of the current field assumed to be
+%                   known
+% delta          : discretization interval for  
+
+% OUTPUTS
+% prior          : Prior map updated
+% posterior      : posterior map updated
+% mutualInfo     : mutual information map updated
+
+
 sill= 5;
-for i=1: size(X,1)
-    [~, closestValueIndex] = min(abs(temperatureVector- FValues(i)));
+for i=1: size(coords,1)
+    [~, closestValueIndex] = min(abs(temperatureV- samples(i)));
     
-    for x_=1:size(pointX,2)
-        for y_=1:size(pointY,2)
+    for rows= 1:size(prior,1)
+        for cols= 1:size(prior,2)
             
-            currentDistance= pdist([X(i) Y(i); pointX(x_) pointY(y_)]);
+            currentDistance= sqrt(sum(([coords(i,2) coords(i,1)]- [(((rows-1)*delta)+delta/2) (((cols-1)*delta)+delta/2)]).^2));
             
-            %             if currentDistance <= range
-            %                 varianceFunction= .01 + (sill*(1.5*(currentDistance/range)-.5*(currentDistance/range)^3));
-            %             else
-            %                 varianceFunction=  .01+ sill+ 4*(sill/range)*(currentDistance-range);
-            %             end
-            varianceFunction= .01 + sill*(currentDistance/range);
+%             if currentDistance <= range
+%                 varianceFunction= .01 + (sill*(1.5*(currentDistance/range)-.5*(currentDistance/range)^3));
+%             else
+%                 varianceFunction=  .01+ sill;
+%             end
+            sigma= .01 + sill*(currentDistance/range);
             
-            likelihoodCurrentCell= pdf('norm', temperatureVector, temperatureVector(closestValueIndex), varianceFunction);
+            likelihoodCurrentCell= exp(-0.5 * ((temperatureV - temperatureV(closestValueIndex))./sigma).^2) ./ (sqrt(2*pi) .* sigma);
+            %likelihoodCurrentCell= normpdf( temperatureV, temperatureV(closestValueIndex), varianceFunction);
             likelihoodCurrentCell= likelihoodCurrentCell./sum(likelihoodCurrentCell);
             %compute posterior current cell
-            evidence= sum(likelihoodCurrentCell.*reshape(prior(x_,y_,:), 1, size(prior,3)));
+            evidence= sum(likelihoodCurrentCell.*reshape(prior(rows,cols,:), 1, size(prior,3)));
             if evidence ~= 0
-                post= (likelihoodCurrentCell.*reshape(prior(x_,y_,:), 1, size(prior,3)))./evidence;
+                post= (likelihoodCurrentCell.*reshape(prior(rows,cols,:), 1, size(prior,3)))./evidence;
             else
-                post= reshape(prior(x_,y_,:), 1, size(prior,3));
+                post= reshape(prior(rows,cols,:), 1, size(prior,3));
             end
             
-            posterior(x_,y_,:)= reshape(post, 1,1, size(posterior,3));
-            %update mutual information!!
+            posterior(rows,cols,:)= reshape(post, 1,1, size(posterior,3));
+            %update mutual information
             %xEntropy= entropy (reshape(prior(x_,y_,:), 1, size(prior,3)));
-            xyEntropy= entropy(reshape(posterior(x_,y_,:), 1, size(posterior,3)));
-            mutualInfo(x_,y_)= xyEntropy;
+            RVprobability= reshape(posterior(rows,cols,:), 1, size(posterior,3));
+            xyEntropy= sum(-RVprobability(RVprobability> 0).*log2(RVprobability(RVprobability> 0)));
+            mutualInfo(rows,cols)= xyEntropy;
             %update prior with computed posterior
-            prior(x_,y_,:)= posterior(x_,y_,:);        
+            prior(rows,cols,:)= posterior(rows,cols,:);        
         end
     end
     

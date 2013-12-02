@@ -20,10 +20,10 @@ function [interpValues, krigError] = UniversalKriging(KrigMatrix, X, Y, varioMod
 % Universal Kriging
 %==========================================================================
 
-% Initialise output matrices
-Nx=length(coordX);
-Ny=length(coordY);
-Nmeasures=length(X);
+% Initialize output matrices
+Nx= length(coordX);
+Ny= length(coordY);
+Nmeasures= length(X);
 
 interpValues=zeros(Nx,Ny);
 krigError=interpValues;
@@ -66,8 +66,6 @@ for i=1:Ny
     % Parallel computing makes the use of a temporary stocking vector
     % necessary
     tempVecI(j)=Y'*lambdaMu(1:Nmeasures);
-%     B(8:9)=B(8:9)+0.5;
-%     B(14:15)=B(14:15)+0.5;
     
     tempVecE(j)=B'*lambdaMu;
 

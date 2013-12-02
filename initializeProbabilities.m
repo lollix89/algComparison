@@ -1,4 +1,4 @@
-function [fieldPrior, fieldPosterior,  mutualInformationMap,  temperatureVector]= initializeProbabilities(x_,y_)
+function [fieldPrior, fieldPosterior,  mutualInformationMap,  temperatureVector]= initializeProbabilities(lx_,ly_)
             
             fieldPrior=[];
             fieldPosterior= [];
@@ -8,10 +8,10 @@ function [fieldPrior, fieldPosterior,  mutualInformationMap,  temperatureVector]
             %create temperatureVector------------------
             temperatureVector= (temperatureRange(1):temperatureInterval:temperatureRange(2));
             %initialize probabilities distributions----------
-            fieldPrior= initializePriorDistribution(size(x_,2), size(y_,2), temperatureVector);
+            fieldPrior= initializePriorDistribution(lx_, ly_, temperatureVector);
             fieldPosterior= fieldPrior;
             %initialize mutualInformationMap---------------
-            mutualInformationMap= 30.*ones(size(x_,2), size(y_,2));
+            mutualInformationMap= 10.*ones(lx_, ly_);
 end
 
 function fieldPrior= initializePriorDistribution(sizeX, sizeY, temperatureVector)

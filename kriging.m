@@ -1,4 +1,4 @@
-function [interpValues,krigError]=kriging(X,Y,stdV,meanV,fittedModel,fittedParam,trendOrder,x,y)
+function [interpValues,krigError]=kriging(X,Y,stdV,meanV,fittedModel,fittedParam,x,y)
 % Kriging interpolate the values using kriging interpolation
 % input  X                  postion of the sampling points
 %        Y                  values of the sampling points
@@ -6,7 +6,6 @@ function [interpValues,krigError]=kriging(X,Y,stdV,meanV,fittedModel,fittedParam
 %        fittedModel        variogram model (usless since we use only 
 %                           spherical model here)
 %        fittedParam        parameter of the model
-%        trendOrder         trend order (0,1,2)
 %        x,y                interpolation point positions
 
 % output interpValues       values at interpolation points
@@ -14,16 +13,13 @@ function [interpValues,krigError]=kriging(X,Y,stdV,meanV,fittedModel,fittedParam
 
 
 % Generate kriging matrices
-[krigMat,~]=generateKrigMatrix(X, fittedModel, fittedParam, trendOrder);
 
-% if(length(X)>200) % Number of measurements points is high : do NN kriging
-%     kdTree = createns(X,'distance','euclidean'); % create kd-tree
-%     [interpValuesNorm, krigError]=UniversalKrigingKN(KrigMat, Y, fittedModel, fittedParam, x,y, 15, kdTree, trends);
-%     interpValues=interpValuesNorm.*stdV+meanV; % "Denormalize" interpolated values
-% else  % Normal kriging
-[interpValuesNorm, krigError]=UniversalKriging(krigMat,X,Y, fittedModel, fittedParam, x,y, trendOrder);
+trendOrder= 0;
+krigMat= generateKrigMatrix(X, fittedModel, fittedParam, trendOrder);
+
+[interpValuesNorm, krigError]= UniversalKriging(krigMat,X,Y, fittedModel, fittedParam, x,y, trendOrder);
 interpValues=interpValuesNorm.*stdV+meanV; % "Denormalize" interpolated values
-%end
+
 
 % figure
 % hold on

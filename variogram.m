@@ -1,21 +1,22 @@
-function [fittedModel,fittedParam,best_RMSE]=variogram(X,Y,lag,range,var)
+function [fittedModel,fittedParam,best_RMSE]= variogram(sCoord, Y, range)
 % Variogram compute the experimental variogram and fit it with a spherical
 % model
 % INPUT 
-% X : position of the sampling point
+% sCoord : coordinates of the sampling point
 % Y : measured value
 % lag,range : parameters used for experimental variogram computation
-% var : estimation of the field variance
 
 % OUTPUT 
 % fittedModel : Handle of the model used to fit the variogram
 % fittedParam : Parameters of the model
 
 %Compute robust Cressie and Hawkins variogram estimator
-[lags, varioVal] = computeRobustVario(range,lag,X,Y);
+
+lag=10;
+[lags, varioVal] = computeRobustVario(range,lag,sCoord,Y);
 
 %fit variogram
-[fittedModel, fittedParam, best_RMSE] = adjust_vario(lags,varioVal, var);
+[fittedModel, fittedParam, best_RMSE] = adjust_vario(lags, varioVal);
 
 % %Plot fitted variogram
 % 
