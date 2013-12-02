@@ -71,7 +71,7 @@ for i=1:2:size(tBoundaries, 2)-1
         innerPointY= round(Y((sign(ab).*sign(bc)>0 - sign(bc).*sign(ca)> 0)==0));
         linIndexes= ((innerPointX-1).* size(error,1)) + innerPointY;
         
-        innerPoints= error(linIndexes); 
+        innerPoints= error(linIndexes);
         
         meanError= [meanError sum(innerPoints)/length(innerPoints)];
     else
@@ -79,4 +79,6 @@ for i=1:2:size(tBoundaries, 2)-1
     end
     
 end
+
+
 end

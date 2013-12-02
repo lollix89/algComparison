@@ -6,17 +6,21 @@ p0= 0.01;
 stack= [posX posY];
 
 tree=[];
-lowerLimit= max(1, stack- (horizon*nWayPoints));
-upperXLimit= min(fieldX, posX+ (horizon*nWayPoints));
-upperYLimit= min(fieldY, posY+ (horizon*nWayPoints));
-interpolatePatch= error(lowerLimit(1):upperXLimit, lowerLimit(2): upperYLimit);
+lowerLimit= max(1, round(stack)- (horizon*(nWayPoints+2)));
+upperXLimit= min(fieldX, round(posX)+ (horizon*(nWayPoints+2)));
+upperYLimit= min(fieldY, round(posY)+ (horizon*(nWayPoints+2)));
+interpolatePatch= error(lowerLimit(2): upperYLimit, lowerLimit(1):upperXLimit);
 interpolatePatch= interpolate(interpolatePatch);
-error(lowerLimit(1):upperXLimit, lowerLimit(2): upperYLimit)= interpolatePatch;
+error(lowerLimit(2): upperYLimit, lowerLimit(1):upperXLimit)= interpolatePatch;
+
+%normalizing the error map
+range = max(error(:)) - min(error(:));
+error = (error - min(error(:))) ./ range;
 
 futureStack= [];
 currentIdx= 2;
 
-for i= 1:nWayPoints  
+for i= 1:nWayPoints +1
     while ~isempty(stack)
         
         tree(end+1).currentNode= stack(1,:);
@@ -30,8 +34,9 @@ for i= 1:nWayPoints
         %mean of all the errors.
         arrivalPoints= arrivalPoints(:, meanError> mean(meanError));
         meanError= arrivalPoints(3,:);
+        
         arrivalPoints= arrivalPoints(1:2,:);
-    
+        
         tree(end).error= meanError;
         tree(end).pheromone= p0.*ones(1,length(meanError));
         tree(end).nextNode= [arrivalPoints; currentIdx:currentIdx+length(meanError)-1];

@@ -20,6 +20,10 @@ for i= 1:nWayPoints
     interpolatePatch= error(extremeDown:extremeUp, extremeLeft:extremeRight);
     error(extremeDown:extremeUp, extremeLeft:extremeRight)= interpolate(interpolatePatch);
     
+    %normalizing the error map
+    range = max(error(:)) - min(error(:));
+    error = (error - min(error(:))) ./ range;
+    
     [arrivalPoints, tBoundaries]= findAllowableTriangles(currentPosX, currentPosY, fieldX, fieldY , allowableDirections, horizon);
     
     meanError= computeMeanError(currentPosX, currentPosY, tBoundaries, error);
