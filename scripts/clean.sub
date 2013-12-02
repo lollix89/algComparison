@@ -1,0 +1,22 @@
+#!/bin/bash
+#
+# The arguments below serve as defaults, which can be overridden by giving
+# arguments directly to qsub.
+#
+# specify job name
+#$ -N doclean
+#
+# specify shell to execute this script with
+#$ -S /bin/bash
+#
+# redirect output
+#$ -e logs # stderr
+#$ -o logs # stdout
+#
+# merge output streams
+#$ -j y
+#
+# specify working directory
+#$ -cwd
+
+./scripts/template "find $2 -type f -exec cat {} \\; > $1 && rm -rf $2"

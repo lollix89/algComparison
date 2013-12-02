@@ -1,0 +1,27 @@
+#!/bin/bash
+#
+# The arguments below serve as defaults, which can be overridden by giving
+# arguments directly to qsub.
+#
+# specify job name
+#$ -N template
+#
+# specify shell to execute this script with
+#$ -S /bin/bash
+#
+# redirect output
+#$ -e logs # stderr
+#$ -o logs # stdout
+#
+# merge output streams
+#$ -j y
+#
+# specify working directory
+#$ -cwd
+
+# make seed
+# Build from nanoseconds since the epoch, the job id, and the task id. Then
+# take the checksum to obtain a 32-bit value
+QRS_SEED=$( echo -n $( date +%s%N ).$JOB_ID.$TASK_ID | cksum | cut -d ' ' -f1 )
+
+./scripts/template "matlab -nodesktop -nosplash -nojvm -r \"qrs.run('RandomSeed',$QRS_SEED, $*); exit;\""

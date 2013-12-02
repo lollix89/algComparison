@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# queue job and save job id
+JOB_OUTPUT=$( qsub $@ )
+if [ $? -ne 0 ]; then
+	exit $?
+fi
+
+# qsub a new job after the above job completes
+echo $JOB_OUTPUT | cut -d ' ' -f3 | cut -d '.' -f1

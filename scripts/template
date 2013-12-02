@@ -1,0 +1,10 @@
+#!/bin/bash
+
+echo Hostname:   `hostname`
+echo Start time: `date`
+echo Execute:    $@
+echo =================================================
+eval $@
+echo =================================================
+echo End time:   `date`
+echo

@@ -20,17 +20,7 @@ close all;
 plotOn=0;
 
 %---------------Generate a random field---------------
-RandStream.setGlobalStream(RandStream('mt19937ar','seed',sum(100*clock)));
-jobID= 1;%randi([1 3]);
-
-if mod(jobID, 3)== 1
-    fieldRange= 40;
-elseif mod(jobID,3)== 2
-    fieldRange= 20;
-else
-    fieldRange= 10;
-end
-field=fields.gaussian.generate('spherical',300,1,[25 25 0 fieldRange]);
+field=fields.gaussian.generate('spherical',300,1,[25 25 0 qrs.config('FieldRange')]);
 [Ly,Lx]=size(field);
 
 %points where the error is computed
