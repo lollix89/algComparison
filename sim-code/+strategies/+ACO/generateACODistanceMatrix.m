@@ -10,7 +10,7 @@ lowerLimit= max(1, round(stack)- (horizon*(nWayPoints+2)));
 upperXLimit= min(fieldX, round(posX)+ (horizon*(nWayPoints+2)));
 upperYLimit= min(fieldY, round(posY)+ (horizon*(nWayPoints+2)));
 interpolatePatch= error(lowerLimit(2): upperYLimit, lowerLimit(1):upperXLimit);
-interpolatePatch= interpolate(interpolatePatch);
+interpolatePatch= interpolate.interpolate(interpolatePatch);
 error(lowerLimit(2): upperYLimit, lowerLimit(1):upperXLimit)= interpolatePatch;
 
 %normalizing the error map

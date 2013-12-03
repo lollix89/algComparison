@@ -1,4 +1,4 @@
-function test_pathACO(algorithm, strategy)
+function startSimulation(algorithm, strategy)
 %%algorithm: 
 %%          -'kriging': uses the kriging error map to move around . 
 %%          -'mutualInfo': uses mutual information map to move around
@@ -86,7 +86,7 @@ samplingP= [station; round([posX posY])];
 grid(sub2ind(size(grid), samplingP(:,2), samplingP(:,1))) = field(sub2ind(size(field), samplingP(:,2), samplingP(:,1)));
 
 if strcmp(algorithm, 'mutualInfo')
-    [prior,posterior,mutualInfo, temperatureVector]= initializeProbabilities(lx_,ly_); 
+    [prior,posterior,mutualInfo, temperatureVector]= mutual.initializeProbabilities(lx_,ly_); 
 end
 % if strcmp(strategy, 'spiral')
 %     len= length(px);
@@ -126,8 +126,8 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)<3
             Y_=(Y-meanV)/stdV;
             
             %variogram fitting and kriging error computation
-            [fittedModel,fittedParam]= variogram(X,Y_,Range);
-            [interpMap,krigE]= kriging(X,Y_,stdV,meanV,fittedModel,fittedParam,x_,y_);
+            [fittedModel,fittedParam]= kriging.variogram(X,Y_,Range);
+            [interpMap,krigE]= kriging.kriging(X,Y_,stdV,meanV,fittedModel,fittedParam,x_,y_);
             errorMap= krigE;
             
         case 'mutualInfo'
@@ -140,15 +140,15 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)<3
                 samplePositions= X;
                 samples= Y;
             end
-            [prior, posterior, mutualInfo]= computePosteriorAndMutualInfo(prior, posterior, mutualInfo, temperatureVector, samples, samplePositions, fieldRange, delta);
+            [prior, posterior, mutualInfo]= mutual.computePosteriorAndMutualInfo(prior, posterior, mutualInfo, temperatureVector, samples, samplePositions, fieldRange, delta);
             errorMap= mutualInfo;
             alreadySampled= [alreadySampled; samplePositions];
             %Interpolate values using Kriging interpolation algorithm
             meanV= mean(Y);
             stdV= std(Y);
             Y_= (Y-meanV)/stdV;
-            [fittedModel,fittedParam]= variogram(X,Y_,Range);
-            [interpMap,~]= kriging(X,Y_,stdV,meanV,fittedModel,fittedParam,x_,y_);
+            [fittedModel,fittedParam]= kriging.variogram(X,Y_,Range);
+            [interpMap,~]= kriging.kriging(X,Y_,stdV,meanV,fittedModel,fittedParam,x_,y_);
             
     end
     
@@ -159,12 +159,12 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)<3
             %Compute the best path by using the ACO algorithm
             Map= nan(Lx,Ly);
             Map(x_,y_)= errorMap;
-            distanceTree= generateACODistanceMatrix(posX, posY, Lx, Ly, Map, allowableDirections, horizon, nWayPoints);
-            path= findACOpath(distanceTree, nWayPoints); 
+            distanceTree= strategies.ACO.generateACODistanceMatrix(posX, posY, Lx, Ly, Map, allowableDirections, horizon, nWayPoints);
+            path= strategies.ACO.findACOpath(distanceTree, nWayPoints); 
             posX= path(end,1);
             posY= path(end,2);
             
-            [Pts2visit, distance(iter+1), h0] = findPtsAlongPath(path, speedHeli, measPeriod,distance(iter),h0);
+            [Pts2visit, distance(iter+1), h0] = strategies.findPtsAlongPath(path, speedHeli, measPeriod,distance(iter),h0);
         case 'greedy'
             %%
             % Find a path in the field by using a greedy strategy that
@@ -173,11 +173,11 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)<3
             Map= nan(Lx,Ly);
             Map(x_,y_)= errorMap;
                 
-            path= greedy(posX, posY, Lx, Ly, Map, allowableDirections, horizon, nWayPoints); 
+            path= strategies.greedy.greedy(posX, posY, Lx, Ly, Map, allowableDirections, horizon, nWayPoints); 
             posX= path(end,1);
             posY= path(end,2);
             
-            [Pts2visit, distance(iter+1), h0] = findPtsAlongPath(path, speedHeli, measPeriod, distance(iter),h0);
+            [Pts2visit, distance(iter+1), h0] = strategies.findPtsAlongPath(path, speedHeli, measPeriod, distance(iter),h0);
         case 'sampleOnly'
             %%
             %Assume the robot moves with infinite velocity to the point

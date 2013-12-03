@@ -18,7 +18,7 @@ for i= 1:nWayPoints
     extremeUp= min(fieldY, round(currentPosY+ 2*horizon));
     extremeDown= max(1, round(currentPosY- 2*horizon));
     interpolatePatch= error(extremeDown:extremeUp, extremeLeft:extremeRight);
-    error(extremeDown:extremeUp, extremeLeft:extremeRight)= interpolate(interpolatePatch);
+    error(extremeDown:extremeUp, extremeLeft:extremeRight)= interpolate.interpolate(interpolatePatch);
     
     %normalizing the error map
     range = max(error(:)) - min(error(:));
