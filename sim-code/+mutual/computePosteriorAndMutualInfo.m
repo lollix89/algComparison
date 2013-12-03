@@ -1,4 +1,4 @@
-function [prior, posterior, mutualInfo]= computePosteriorAndMutualInfo(prior, posterior, mutualInfo, temperatureV, samples, coords, range, delta, sill, func)
+function [prior, posterior, mutualInfo]= computePosteriorAndMutualInfo(prior, posterior, mutualInfo, temperatureV, samples, coords, range, delta)
 
 % update the posterior for every cell given the current samples and update
 % conditional entropy H(X|Y).
@@ -20,6 +20,11 @@ function [prior, posterior, mutualInfo]= computePosteriorAndMutualInfo(prior, po
 % posterior      : posterior map updated
 % mutualInfo     : mutual information map updated
 
+if isKey(qrs.config,'Sill')
+    sill= str2double(qrs.config('Sill'));
+else
+    sill= 5;
+end
 
 for i=1: size(coords,1)
     [~, closestValueIndex] = min(abs(temperatureV- samples(i)));
@@ -29,13 +34,13 @@ for i=1: size(coords,1)
             
             currentDistance= sqrt(sum(([coords(i,2) coords(i,1)]- [(((rows-1)*delta)+delta/2) (((cols-1)*delta)+delta/2)]).^2));
             
-            if  strcmp(func, 'sph')
+            if isKey(qrs.config,'Function') && strcmp(qrs.config('Function'), 'sph')
                 if currentDistance <= range
                     sigma_= .01 + (sill*(1.5*(currentDistance/range)-.5*(currentDistance/range)^3));
                 else
                     sigma_= .01+ sill;
                 end
-            elseif strcmp(func, 'lin')
+            elseif (isKey(qrs.config,'Function') && strcmp(qrs.config('Function'), 'lin')) || ~isKey(qrs.config,'Function')
                 sigma_= .01 + currentDistance*(sill/range);
             end
             likelihoodCurrentCell= exp(-0.5 * ((temperatureV - temperatureV(closestValueIndex))./sigma_).^2) ./ (sqrt(2*pi) .* sigma_);

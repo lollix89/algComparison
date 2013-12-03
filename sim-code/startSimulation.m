@@ -23,16 +23,6 @@ plotOn= 0;
 field=fields.gaussian.generate('spherical',300,1,[25 25 0 qrs.config('FieldRange')]);
 %Get config parameters
 fieldRange= qrs.config('FieldRange');
-if isKey(qrs.config,'Sill')
-    sill= str2double(qrs.config('Sill'));
-else
-    sill= 5;
-end
-if strcmp(qrs.config('Function'), 'sph')
-    func= 'sph';
-else
-    func= 'lin';
-end
 
 [Ly,Lx]=size(field);
 
@@ -150,7 +140,7 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
                 samplePositions= X;
                 samples= Y;
             end
-            [prior, posterior, mutualInfo]= mutual.computePosteriorAndMutualInfo(prior, posterior, mutualInfo, temperatureVector, samples, samplePositions, fieldRange, delta, sill, func);
+            [prior, posterior, mutualInfo]= mutual.computePosteriorAndMutualInfo(prior, posterior, mutualInfo, temperatureVector, samples, samplePositions, fieldRange, delta);
             errorMap= mutualInfo;
             alreadySampled= [alreadySampled; samplePositions];
             %Interpolate values using Kriging interpolation algorithm
