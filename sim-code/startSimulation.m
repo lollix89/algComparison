@@ -273,9 +273,9 @@ function saveResults(strategy, distance, RMSE)
 if strcmp(strategy, 'ACO') || strcmp(strategy,'greedy')
     distance= distance(1:end-1);
     RMSE=interp1(distance,RMSE,0:50:3000,'linear','extrap');
-    csvwrite(qrs.config('DataDirectory'),[0:50:3000; RMSE]');
+    dlmwrite(qrs.config('DataDirectory'),[0:50:3000; RMSE]','-append');
 else
-    csvwrite(qrs.config('DataDirectory'),[1:150; RMSE]');
+    dlmwrite(qrs.config('DataDirectory'),[1:150; RMSE]', '-append');
 end
 
 end

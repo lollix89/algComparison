@@ -29,7 +29,6 @@ do
     		"'Function','$j',"		    \
     		"'Sill','$i',"		    \
     		"'FieldModel','$FIELD_MODEL'"  )
-    	./qclean $JOB_ID "$DATA_DIR" "$DATA_DIR" > /dev/null
 
     	SUB_NAME="${i}_${j}_medium_range"
     	eval JOB_NAME=$JOB_NAME_PATTERN
@@ -43,7 +42,6 @@ do
     		"'Function','$i',"		    \
     		"'Sill','$j',"		    \
     		"'FieldModel','$FIELD_MODEL'"  )
-    	./qclean $JOB_ID "$DATA_DIR" "$DATA_DIR" > /dev/null
 
     	SUB_NAME="${i}_${j}_long_range"
     	eval JOB_NAME=$JOB_NAME_PATTERN
@@ -57,7 +55,6 @@ do
     		"'Function','$i',"		    \
     		"'Sill','$j',"		    \
     		"'FieldModel','$FIELD_MODEL'"  )
-    	./qclean $JOB_ID "$DATA_DIR" "$DATA_DIR" > /dev/null
 
 	done
 done
