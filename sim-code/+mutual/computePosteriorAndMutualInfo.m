@@ -1,4 +1,4 @@
-function [prior, posterior, mutualInfo]= computePosteriorAndMutualInfo(prior, posterior, mutualInfo, temperatureV, samples, coords, range, delta)
+function [prior, posterior, mutualInfo]= computePosteriorAndMutualInfo(prior, posterior, mutualInfo, temperatureV, samples, coords, range, delta, sill, func)
 
 % update the posterior for every cell given the current samples and update
 % conditional entropy H(X|Y).
@@ -20,12 +20,6 @@ function [prior, posterior, mutualInfo]= computePosteriorAndMutualInfo(prior, po
 % posterior      : posterior map updated
 % mutualInfo     : mutual information map updated
 
-
-if isKey(qrs.config,'Sill')
-    sill= str2double(qrs.config('Sill'));
-else
-    sill= 5;
-end
 
 for i=1: size(coords,1)
     [~, closestValueIndex] = min(abs(temperatureV- samples(i)));
