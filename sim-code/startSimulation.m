@@ -125,7 +125,7 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
             
             %Variogram fitting and kriging error computation
             [fittedModel,fittedParam]= kriging.variogram(X,Y_,Range);
-            [interpMap,krigE]= kriging.kriging(X,Y_,stdV,meanV,fittedModel,fittedParam,x_,y_);
+            [interpMap,krigE]= kriging.computeKriging(X,Y_,stdV,meanV,fittedModel,fittedParam,x_,y_);
             errorMap= krigE;
             
         case 'mutualInfo'
@@ -146,8 +146,7 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
             stdV= std(Y);
             Y_= (Y-meanV)/stdV;
             [fittedModel,fittedParam]= kriging.variogram(X,Y_,Range);
-            [interpMap,~]= kriging.kriging(X,Y_,stdV,meanV,fittedModel,fittedParam,x_,y_);
-            
+            [interpMap,~]= kriging.computeKriging(X,Y_,stdV,meanV,fittedModel,fittedParam,x_,y_);
     end
     
     RMSE(iter) = sqrt(mean(mean((interpMap - field(x_,y_)).^2)));
