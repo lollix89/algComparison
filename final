@@ -1,18 +1,23 @@
 #!/bin/bash
 
+if [ $# -ne 1 ]; then
+    echo "Usage: run-example name" >&2
+    exit 2
+fi
 
-JOB_NAME_PATTERN="\$SUB_NAME"
+
+JOB_NAME_PATTERN="$1_\$SUB_NAME"
 DATA_DIR_PATTERN="./data/\$JOB_NAME"
 
 FIELD_MODEL="spherical"
 FUNCTION=('sph' 'lin')
-NUM_RUNS=1000
+NUM_RUNS= 1000
 
 for i in $(seq 4 3 46)
 do
 	for j in "${FUNCTION[@]}"
     do
-    	SUB_NAME=$i"_"$j"_short_range"
+    	SUB_NAME="${i}_${j}_short_range"
     	eval JOB_NAME=$JOB_NAME_PATTERN
     	eval DATA_DIR=$DATA_DIR_PATTERN
     	JOB_ID=$( ./qjob -N "$JOB_NAME" -t 1-$NUM_RUNS ./scripts/qrs.sub \
@@ -26,8 +31,7 @@ do
     		"'FieldModel','$FIELD_MODEL'"  )
     	./qclean $JOB_ID "$DATA_DIR" "$DATA_DIR" > /dev/null
 
-
-    	SUB_NAME=$i"_"$j"_medium_range"
+    	SUB_NAME="${i}_${j}_medium_range"
     	eval JOB_NAME=$JOB_NAME_PATTERN
     	eval DATA_DIR=$DATA_DIR_PATTERN
     	JOB_ID=$( ./qjob -N "$JOB_NAME" -t 1-$NUM_RUNS ./scripts/qrs.sub \
@@ -41,7 +45,7 @@ do
     		"'FieldModel','$FIELD_MODEL'"  )
     	./qclean $JOB_ID "$DATA_DIR" "$DATA_DIR" > /dev/null
 
-    	SUB_NAME=$i"_"$j"_long_range"
+    	SUB_NAME="${i}_${j}_long_range"
     	eval JOB_NAME=$JOB_NAME_PATTERN
     	eval DATA_DIR=$DATA_DIR_PATTERN
     	JOB_ID=$( ./qjob -N "$JOB_NAME" -t 1-$NUM_RUNS ./scripts/qrs.sub \
@@ -54,5 +58,6 @@ do
     		"'Sill','$j',"		    \
     		"'FieldModel','$FIELD_MODEL'"  )
     	./qclean $JOB_ID "$DATA_DIR" "$DATA_DIR" > /dev/null
+
 	done
 done

@@ -262,9 +262,9 @@ function saveResults(strategy, distance, RMSE)
 if strcmp(strategy, 'ACO') || strcmp(strategy,'greedy')
     distance=distance(1:end-1);
     RMSE=interp1(distance,RMSE,0:50:3000,'linear','extrap');
-    dlmwrite(qrs.config('DataDirectory'),[distance' RMSE'],'delimiter','\t');
+    csvwrite(qrs.config('DataDirectory'),[distance' RMSE']');
 else
-    dlmwrite(qrs.config('DataDirectory'),[(1:150)' RMSE'],'delimiter','\t');
+    csvwrite(qrs.config('DataDirectory'),[(1:150)' RMSE']);
 end
 
 end
