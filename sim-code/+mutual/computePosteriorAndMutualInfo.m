@@ -21,7 +21,12 @@ function [prior, posterior, mutualInfo]= computePosteriorAndMutualInfo(prior, po
 % mutualInfo     : mutual information map updated
 
 
-sill= 5;
+if isKey(qrs.config,'Sill')
+    sill= qrs.config('Sill');
+else
+    sill= 5;
+end
+
 for i=1: size(coords,1)
     [~, closestValueIndex] = min(abs(temperatureV- samples(i)));
     
@@ -30,12 +35,15 @@ for i=1: size(coords,1)
             
             currentDistance= sqrt(sum(([coords(i,2) coords(i,1)]- [(((rows-1)*delta)+delta/2) (((cols-1)*delta)+delta/2)]).^2));
             
-%             if currentDistance <= range
-%                 varianceFunction= .01 + (sill*(1.5*(currentDistance/range)-.5*(currentDistance/range)^3));
-%             else
-%                 varianceFunction=  .01+ sill;
-%             end
-            sigma= .01 + sill*(currentDistance/range);
+            if  isKey(qrs.config,'Function') && strcmp(qrs.config('Function'), 'sph')
+                if currentDistance <= range
+                    sigma= .01 + (sill*(1.5*(currentDistance/range)-.5*(currentDistance/range)^3));
+                else
+                    sigma= .01+ sill;
+                end
+            elseif (isKey(qrs.config,'Function') && strcmp(qrs.config('Function'), 'lin')) || ~isKey(qrs.config,'Function')
+                sigma= .01 + currentDistance*(sill/range);
+            end
             
             likelihoodCurrentCell= exp(-0.5 * ((temperatureV - temperatureV(closestValueIndex))./sigma).^2) ./ (sqrt(2*pi) .* sigma);
             %likelihoodCurrentCell= normpdf( temperatureV, temperatureV(closestValueIndex), varianceFunction);

@@ -45,8 +45,6 @@ grid= nan(Lx,Ly);
 
 posX= randi([1 300]);
 posY= randi([1 300]);
-posX= 100;
-posY= 100;
 
 speedHeli= 3.7;
 allowableDirections= 9;
@@ -69,7 +67,7 @@ Range= 130;
 aX= [max(1, floor(posX-(Range/sqrt(2)))) min(Lx, floor(posX+(Range/sqrt(2))))];
 aY= [max(1, floor(posY-(Range/sqrt(2)))) min(Ly, floor(posY+(Range/sqrt(2))))];
 station= [randi(aX) randi(aY)];
-nWayPoints=5;
+nWayPoints= 1;
 
 alreadySampled=[];
 errorMap=[];
@@ -264,19 +262,9 @@ function saveResults(strategy, distance, RMSE)
 if strcmp(strategy, 'ACO') || strcmp(strategy,'greedy')
     distance=distance(1:end-1);
     RMSE=interp1(distance,RMSE,0:50:3000,'linear','extrap');
-    f= fopen(qrs.config('DataDirectory'), 'w');
-    header={'Meters', 'RMSE'};
-    fprintf(f, '%s\t', header{:});
-    fprintf(f,'\n');
-    fclose(f);
-    dlmwrite(qrs.config('DataDirectory'),[distance' RMSE'],'-append','delimiter','\t');
+    dlmwrite(qrs.config('DataDirectory'),[distance' RMSE'],'delimiter','\t');
 else
-    f= fopen(qrs.config('DataDirectory'), 'w');
-    header={'#samplings', 'RMSE'};
-    fprintf(f, '%s\t', header{:});
-    fprintf(f,'\n');
-    fclose(f);
-    dlmwrite(qrs.config('DataDirectory'),[(1:150)' RMSE'],'-append','delimiter','\t');
+    dlmwrite(qrs.config('DataDirectory'),[(1:150)' RMSE'],'delimiter','\t');
 end
 
 end
