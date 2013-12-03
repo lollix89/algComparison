@@ -37,14 +37,14 @@ for i=1: size(coords,1)
             
             if  isKey(qrs.config,'Function') && strcmp(qrs.config('Function'), 'sph')
                 if currentDistance <= range
-                    sigma= .01 + (sill*(1.5*(currentDistance/range)-.5*(currentDistance/range)^3));
+                    sigma_= .01 + (sill*(1.5*(currentDistance/range)-.5*(currentDistance/range)^3));
                 else
-                    sigma= .01+ sill;
+                    sigma_= .01+ sill;
                 end
             elseif (isKey(qrs.config,'Function') && strcmp(qrs.config('Function'), 'lin')) || ~isKey(qrs.config,'Function')
-                sigma= .01 + currentDistance*(sill/range);
+                sigma_= .01 + currentDistance*(sill/range);
             end
-            likelihoodCurrentCell= exp(-0.5 * ((temperatureV - temperatureV(closestValueIndex))./sigma).^2) ./ (sqrt(2*pi) .* sigma);
+            likelihoodCurrentCell= exp(-0.5 * ((temperatureV - temperatureV(closestValueIndex))./sigma_).^2) ./ (sqrt(2*pi) .* sigma_);
             %likelihoodCurrentCell= normpdf( temperatureV, temperatureV(closestValueIndex), varianceFunction);
             likelihoodCurrentCell= likelihoodCurrentCell./sum(likelihoodCurrentCell);
             %compute posterior current cell
