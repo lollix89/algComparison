@@ -39,8 +39,8 @@ do
     		"'FieldRange',40,"              \
     		"'Algorithm','mutualInfo',"		\
     		"'Strategy','greedy',"		    \
-    		"'Function','$i',"		    \
-    		"'Sill','$j',"		    \
+    		"'Function','$j',"		    \
+    		"'Sill','$i',"		    \
     		"'FieldModel','$FIELD_MODEL'"  )
 
     	SUB_NAME="${i}_${j}_long_range"
@@ -52,8 +52,8 @@ do
     		"'FieldRange',50,"              \
     		"'Algorithm','mutualInfo',"		\
     		"'Strategy','greedy',"		    \
-    		"'Function','$i',"		    \
-    		"'Sill','$j',"		    \
+    		"'Function','$j',"		    \
+    		"'Sill','$i',"		    \
     		"'FieldModel','$FIELD_MODEL'"  )
 
 	done
