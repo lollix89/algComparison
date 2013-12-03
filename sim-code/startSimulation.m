@@ -1,9 +1,9 @@
 function startSimulation(algorithm, strategy)
-%%algorithm: 
+%%ALGORITHM: 
 %%          -'kriging': uses the kriging error map to move around . 
 %%          -'mutualInfo': uses mutual information map to move around
 
-%%strategy: 
+%%STRATEGY: 
 %%          -"sampleOnly": samples map in the point corresponding to the maximum error.
 %%          -"ACO": uses ACO to find the path that maximizes the mean error within the path
 %%          -"greedy": similar to ACO but always chooses the path with the highest error
@@ -11,20 +11,20 @@ function startSimulation(algorithm, strategy)
 %%          -"spiral": moves on a spiral path. (commented)
 
 
-%%oss: 
+%%OSS: 
 %%      both algorithms use kriging as interpolation strategy.
 %%      when using strategy "random" or "spiral" the algorithm used doesn't matter.  
 %%      for every run the position of the robot is random and so is the position of the unique static sensor.
 
 close all;
-plotOn=0;
+plotOn= 0;
 
-%---------------Generate a random field---------------
+%Generate a random field
 field=fields.gaussian.generate('spherical',300,1,[25 25 0 qrs.config('FieldRange')]);
 fieldRange= qrs.config('FieldRange');
 [Ly,Lx]=size(field);
 
-%points where the error is computed
+%Points where the error is computed
 delta= 5;
 x_= ceil(delta/2)+(0:delta:Lx-1);
 y_= ceil(delta/2)+(0:delta:Ly-1);
@@ -45,6 +45,9 @@ grid= nan(Lx,Ly);
 
 posX= randi([1 300]);
 posY= randi([1 300]);
+posX= 100;
+posY= 100;
+
 speedHeli= 3.7;
 allowableDirections= 9;
 horizon= 20;
@@ -52,13 +55,12 @@ measPeriod= 3;
 distance=0;
 h0=0;
 
-%simulation parameters:
+%Simulation parameters:
 %   -root mean square error
 %   -number of iteration
 %   -Range considered to compute the variogram
 %   -Static station position which must be in Range within the robot position or it s not
 %       possible to compute the variogram.
-%   -Number of waypoints to reach before recomputing the path
 %   -Number of waypoints in the path
 
 RMSE=[];
@@ -105,12 +107,11 @@ end
 % end
 
 %% loop
-while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)<3040) ...
-        || ((strcmp('sampleOnly', strategy)|| strcmp('random', strategy)) && iter <=150)...
+while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 3040) ...
+        || ((strcmp('sampleOnly', strategy)|| strcmp('random', strategy)) && iter <= 150)...
         ||  (strcmp('spiral',strategy) && size(spiralPath,1) > 1)
     display(iter)
-    %----------------------------------------------------------------------
-    %get sampling points
+    %Get sampling points
     X=[];   
     [X(:,2),X(:,1)]= ind2sub(size(grid), find(~isnan(grid)));   %sampling position as x(cols), y(rows)
     Y= grid(sub2ind(size(grid), X(:,2),X(:,1)));                %sampled values 
@@ -118,21 +119,20 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)<3
     switch algorithm
         case 'kriging'
             %%
-            %kriging error controller
-            
+            %Kriging error controller
             %data standardization
             meanV=mean(Y);
             stdV=std(Y);
             Y_=(Y-meanV)/stdV;
             
-            %variogram fitting and kriging error computation
+            %Variogram fitting and kriging error computation
             [fittedModel,fittedParam]= kriging.variogram(X,Y_,Range);
             [interpMap,krigE]= kriging.kriging(X,Y_,stdV,meanV,fittedModel,fittedParam,x_,y_);
             errorMap= krigE;
             
         case 'mutualInfo'
             %%
-            %mutual information controller
+            %Mutual information controller
             if ~isempty(alreadySampled)
                 [samplePositions, indexUniqe]= setdiff(X,alreadySampled,'rows');
                 samples= Y(indexUniqe);
@@ -182,7 +182,7 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)<3
             %%
             %Assume the robot moves with infinite velocity to the point
             %where the error is the highest, therefore, this strategy
-            %doesn't need a moving plan.
+            %doesn't need a moving strategy.
             Map= nan(Lx,Ly);
             Map(x_,y_)= errorMap; 
             [~, idx]= max(Map(:));
@@ -192,7 +192,7 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)<3
             %%
             %All the strategy are disregarded and the robot moves with
             %infinity velocity to a random position, this strategy doesn't
-            %need a moving plan.
+            %need a moving strategy.
             availablePositionMatrix= ones(Lx,Ly);
             if ~isempty(station)
                 availablePositionMatrix(sub2ind(size(availablePositionMatrix), station(:,2), station(:,1)))= 0;
@@ -212,11 +212,11 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)<3
 %             spiralPath= spiralPath(size(path,1)+1:end,:);
 
     end
-    %---------------------------Add sampled points to the grid-------------------------------------------
+    %Add sampled points to the grid
     if ~isempty(Pts2visit)
         grid(sub2ind(size(grid), Pts2visit(:,2), Pts2visit(:,1))) = field(sub2ind(size(field), Pts2visit(:,2), Pts2visit(:,1)));
     end
-    %---------------------------Plots-------------------------------------------
+    %Plots
     if plotOn==1
         %Plot the interpolated maps together with the sampling points and
         %the path of the robot.
@@ -243,25 +243,40 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)<3
     end
     iter=iter+1;
 end
-%%Interpolate the RMSE and save it to a file.
-if strcmp(strategy, 'ACO') || strcmp(strategy,'greedy')
-    distance=distance(1:end-1);
-    RMSE=interp1(distance,RMSE,0:50:3000,'linear','extrap');
-% elseif strcmp(strategy,'spiral')
-%     distance= distance(1:end-1);
-%     RMSE_=interp1(distance,RMSE,0:50:distance(end),'linear','extrap');
-
-end
-csvwrite('test.csv', RMSE);
+saveResults(strategy, distance, RMSE)
 %movie2avi(F, 'movie.avi', 'compression','None', 'fps',0.5);
 end
 
 
+%%2d plotting
 function plotmap(x,y,map)
-% 2d plot
 [~, ch]=contourf(x,y,map,30);
 set(ch,'edgecolor','none');
 set(gca,'FontSize',16)
 axis('equal')
 axis([-3 303 -3 303])
+end
+
+function saveResults(strategy, distance, RMSE)
+%%Interpolate the RMSE and save it to a file or just save it to a file if
+%%using random or sample only strategy. 
+
+if strcmp(strategy, 'ACO') || strcmp(strategy,'greedy')
+    distance=distance(1:end-1);
+    RMSE=interp1(distance,RMSE,0:50:3000,'linear','extrap');
+    f= fopen(qrs.config('DataDirectory'), 'w');
+    header={'Meters', 'RMSE'};
+    fprintf(f, '%s\t', header{:});
+    fprintf(f,'\n');
+    fclose(f);
+    dlmwrite(qrs.config('DataDirectory'),[distance' RMSE'],'-append','delimiter','\t');
+else
+    f= fopen(qrs.config('DataDirectory'), 'w');
+    header={'#samplings', 'RMSE'};
+    fprintf(f, '%s\t', header{:});
+    fprintf(f,'\n');
+    fclose(f);
+    dlmwrite(qrs.config('DataDirectory'),[(1:150)' RMSE'],'-append','delimiter','\t');
+end
+
 end

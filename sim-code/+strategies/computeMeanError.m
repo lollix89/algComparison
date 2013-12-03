@@ -4,7 +4,7 @@ function [meanError]= computeMeanError(Sx, Sy, tBoundaries, error)
 meanError=[];
 
 for i=1:2:size(tBoundaries, 2)-1
-    if all(~isnan(tBoundaries(:,i))) && all(~isnan(tBoundaries(:,i+1)))
+    if all(~isnan(tBoundaries(:,i)))
         minX= min([Sx tBoundaries(1,i) tBoundaries(1,i+1)]);
         maxX= max([Sx tBoundaries(1,i) tBoundaries(1,i+1)]);
         minY= min([Sy tBoundaries(2,i) tBoundaries(2,i+1)]);
@@ -42,8 +42,8 @@ for i=1:2:size(tBoundaries, 2)-1
         %                 innerPoints= [innerPoints error(round(floor((j-1)/width)+minY), round(mod(j-1, width)+ minX))];
         %             end
         %         end
-        x= minX+ (1:3:width)';
-        y= minY+ (1:3:heigth);
+        x= minX+ (1:4:width)';
+        y= minY+ (1:4:heigth);
         
         X= x(:, ones(length(y),1));
         X= X(:);

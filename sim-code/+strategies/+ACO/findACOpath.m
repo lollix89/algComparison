@@ -32,8 +32,13 @@ while sum(ismember(cell2mat(visitedNodeIndexes), mostCommonPath, 'rows'))/m < .8
         currentLength=1;
         while currentLength <= pathLength
             nextNodes= distanceTree(currentNodeIndex(I)).nextNode(3,:);
-            localIndexes= find(~ismember(nextNodes,visitedNodeIndexes{I})==1);
-            neighbourNodeIndexes= nextNodes(~ismember(nextNodes,visitedNodeIndexes{I}));
+            neighbourNodeIndexes= nextNodes;
+            localIndexes= 1:length(neighbourNodeIndexes);     
+%              localIndexes= find(~ismember(nextNodes,visitedNodeIndexes{I})==1);
+%              neighbourNodeIndexes= nextNodes(~ismember(nextNodes,visitedNodeIndexes{I}));
+%             if(length(localIndexes)~= length(nextNodes))
+%                disp('debug') 
+%             end
             
             %[neighbourNodeIndexes, localIndxes]= setdiff(distanceTree(currentNodeIndex(I)).nextNode(3,:), visitedNodeIndexes{I})
             %Handle the case where the ant gets to a dead end path.
@@ -98,13 +103,13 @@ while sum(ismember(cell2mat(visitedNodeIndexes), mostCommonPath, 'rows'))/m < .8
     modeIdx = mode(uIdx);
     mostCommonPath = uA(modeIdx,:);
     iter= iter +1;
-    %disp(['-------Percentage of converged ants is  ' num2str((sum(ismember(cell2mat(visitedNodeIndexes), mostCommonPath, 'rows'))/m)*100) ' %'])
+    %disp(['Percentage of converged ants is  ' num2str((sum(ismember(cell2mat(visitedNodeIndexes), mostCommonPath, 'rows'))/m)*100) ' %'])
 end
 
-if iter < maxIterations
-    disp(['ACO converged in ' num2str(toc) ' seconds and ' num2str(iter) ' iterations!'])
-end
-disp([num2str(toc) ' seconds '])
+% if iter < maxIterations
+%     disp(['ACO converged in ' num2str(toc) ' seconds and ' num2str(iter) ' iterations!'])
+% end
+% disp([num2str(toc) ' seconds '])
 bestPath= cat(1, distanceTree(bestpathIdxes).currentNode);
 
 end

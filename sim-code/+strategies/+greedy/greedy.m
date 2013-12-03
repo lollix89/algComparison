@@ -24,9 +24,9 @@ for i= 1:nWayPoints
     range = max(error(:)) - min(error(:));
     error = (error - min(error(:))) ./ range;
     
-    [arrivalPoints, tBoundaries]= findAllowableTriangles(currentPosX, currentPosY, fieldX, fieldY , allowableDirections, horizon);
+    [arrivalPoints, tBoundaries]= strategies.findAllowableTriangles(currentPosX, currentPosY, fieldX, fieldY , allowableDirections, horizon);
     
-    meanError= computeMeanError(currentPosX, currentPosY, tBoundaries, error);
+    meanError= strategies.computeMeanError(currentPosX, currentPosY, tBoundaries, error);
     
     %Find forbidden directions for current iteration and delete
     %corresponding values and mean error.

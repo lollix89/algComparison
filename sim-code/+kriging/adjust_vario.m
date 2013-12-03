@@ -77,16 +77,16 @@ for i=1:1%length(models_handles)
     if(isequal(models_handles{i},sph))
         param0=[nugget,sill,range];
         param0=[sill,range];
-       [fitted_param, RMSE, ]=fitvario2(h, vario, param0, models_handles{i},W);
+       [fitted_param, RMSE, ]=kriging.fitvario2(h, vario, param0, models_handles{i},W);
     elseif(isequal(models_handles{i},expo))
         param0=[nugget,sill,range];
-        [fitted_param, RMSE]=fitvario(h, vario, param0, models_handles{i},W);
+        [fitted_param, RMSE]=kriging.fitvario(h, vario, param0, models_handles{i},W);
     elseif(isequal(models_handles{i},damp))
         param0=[nugget, sill, range, damp_hole];
-        [fitted_param, RMSE]=fitvario(h, vario, param0, models_handles{i},W);
+        [fitted_param, RMSE]=kriging.fitvario(h, vario, param0, models_handles{i},W);
     elseif(isequal(models_handles{i},pow))
         param0=[nugget, const_pow, exponent_pow];
-        [fitted_param, RMSE]=fitvario(h, vario, param0, models_handles{i},W);  
+        [fitted_param, RMSE]=kriging.fitvario(h, vario, param0, models_handles{i},W);  
     end
    % Find out which model is the best
    if(RMSE<best_RMSE)

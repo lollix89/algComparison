@@ -21,20 +21,22 @@ futureStack= [];
 currentIdx= 2;
 
 for i= 1:nWayPoints +1
-    while ~isempty(stack)
-        
+    parent= stack(1,:);
+    while ~isempty(stack)   
         tree(end+1).currentNode= stack(1,:);
-        [arrivalPoints, tBoundaries]= findAllowableTriangles(stack(1,1), stack(1,2), fieldX, fieldY , allowableDirections, horizon);
-        meanError= computeMeanError(stack(1,1), stack(1,2), tBoundaries, error);
+        [arrivalPoints, tBoundaries]= strategies.findAllowableTriangles(stack(1,1), stack(1,2), fieldX, fieldY , allowableDirections, horizon);
+        meanError= strategies.computeMeanError(stack(1,1), stack(1,2), tBoundaries, error);
         
         arrivalPoints(:, isnan(arrivalPoints(1,:)))= [];
         meanError(isnan(meanError))= [];
         arrivalPoints(3,:)= meanError;
-        %Only leave the promising edges, those with a error higher that the
+        %Only leave the promising edges, those with an error higher that the
         %mean of all the errors.
         arrivalPoints= arrivalPoints(:, meanError> mean(meanError));
+                %%%%%%%%%%
+        arrivalPoints= arrivalPoints(:,~ismember(arrivalPoints(1:2,:)',parent,'rows'));
+                
         meanError= arrivalPoints(3,:);
-        
         arrivalPoints= arrivalPoints(1:2,:);
         
         tree(end).error= meanError;

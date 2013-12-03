@@ -13,10 +13,10 @@ function [fittedModel,fittedParam,best_RMSE]= variogram(sCoord, Y, range)
 %Compute robust Cressie and Hawkins variogram estimator
 
 lag=10;
-[lags, varioVal] = computeRobustVario(range,lag,sCoord,Y);
+[lags, varioVal] = kriging.computeRobustVario(range,lag,sCoord,Y);
 
 %fit variogram
-[fittedModel, fittedParam, best_RMSE] = adjust_vario(lags, varioVal);
+[fittedModel, fittedParam, best_RMSE] = kriging.adjust_vario(lags, varioVal);
 
 % %Plot fitted variogram
 % 
