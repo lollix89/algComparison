@@ -105,7 +105,7 @@ end
 % end
 
 %% loop
-while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 3040) ...
+while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 3060) ...
         || ((strcmp('sampleOnly', strategy)|| strcmp('random', strategy)) && iter <= 150)...
         ||  (strcmp('spiral',strategy) && size(spiralPath,1) > 1)
     display(iter)
@@ -260,11 +260,11 @@ function saveResults(strategy, distance, RMSE)
 %%using random or sample only strategy. 
 
 if strcmp(strategy, 'ACO') || strcmp(strategy,'greedy')
-    distance=distance(1:end-1);
+    distance= distance(1:end-1);
     RMSE=interp1(distance,RMSE,0:50:3000,'linear','extrap');
-    csvwrite(qrs.config('DataDirectory'),[distance' RMSE']');
+    csvwrite(qrs.config('DataDirectory'),[0:50:3000; RMSE]');
 else
-    csvwrite(qrs.config('DataDirectory'),[(1:150)' RMSE']);
+    csvwrite(qrs.config('DataDirectory'),[1:150; RMSE]');
 end
 
 end
