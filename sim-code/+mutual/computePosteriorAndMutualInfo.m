@@ -22,7 +22,7 @@ function [prior, posterior, mutualInfo]= computePosteriorAndMutualInfo(prior, po
 
 
 if isKey(qrs.config,'Sill')
-    sill= qrs.config('Sill');
+    sill= str2double(qrs.config('Sill'));
 else
     sill= 5;
 end
@@ -44,7 +44,6 @@ for i=1: size(coords,1)
             elseif (isKey(qrs.config,'Function') && strcmp(qrs.config('Function'), 'lin')) || ~isKey(qrs.config,'Function')
                 sigma= .01 + currentDistance*(sill/range);
             end
-            
             likelihoodCurrentCell= exp(-0.5 * ((temperatureV - temperatureV(closestValueIndex))./sigma).^2) ./ (sqrt(2*pi) .* sigma);
             %likelihoodCurrentCell= normpdf( temperatureV, temperatureV(closestValueIndex), varianceFunction);
             likelihoodCurrentCell= likelihoodCurrentCell./sum(likelihoodCurrentCell);
