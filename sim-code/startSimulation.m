@@ -88,7 +88,7 @@ samplingP= [station; round([posX posY])];
 grid(sub2ind(size(grid), samplingP(:,2), samplingP(:,1))) = field(sub2ind(size(field), samplingP(:,2), samplingP(:,1)));
 
 if strcmp(algorithm, 'mutualInfo')
-    [prior,posterior,mutualInfo, temperatureVector]= mutual.initializeProbabilities(lx_,ly_); 
+    [prior,posterior,mutualInfo, temperatureVector]= mutual.initializeProbabilities(lx_, ly_); 
 end
 % if strcmp(strategy, 'spiral')
 %     len= length(px);
@@ -140,7 +140,7 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
                 samplePositions= X;
                 samples= Y;
             end
-            [prior, posterior, mutualInfo]= mutual.computePosteriorAndMutualInfo(prior, posterior, mutualInfo, temperatureVector, samples, samplePositions, fieldRange, delta);
+            [prior, posterior, mutualInfo]= mutual.computePosteriorAndMutualInfo(prior, posterior, mutualInfo, temperatureVector, samples, samplePositions, fieldRange, delta, lx_, ly_);
             errorMap= mutualInfo;
             alreadySampled= [alreadySampled; samplePositions];
             %Interpolate values using Kriging interpolation algorithm

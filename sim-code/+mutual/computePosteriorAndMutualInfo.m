@@ -1,10 +1,10 @@
-function [prior, posterior, mutualInfo]= computePosteriorAndMutualInfo(prior, posterior, mutualInfo, temperatureV, samples, coords, range, delta)
+function [prior, posterior, mutualInfo]= computePosteriorAndMutualInfo(prior, posterior, mutualInfo, temperatureV, samples, coords, range, delta, lx, ly)
 
 % update the posterior for every cell given the current samples and update
 % conditional entropy H(X|Y).
 
 % INPUT
-% prior          : grid of the prior 
+% prior          : grid of the prior
 % posterior      : grid of the posterior
 % mutualInfo     : grid of the muutal information
 % temperatureV   : the vector of temperatures
@@ -13,7 +13,7 @@ function [prior, posterior, mutualInfo]= computePosteriorAndMutualInfo(prior, po
 %                   y(rows) Nx2
 % range          : correlation range of the current field assumed to be
 %                   known
-% delta          : discretization interval for  
+% delta          : discretization interval for
 
 % OUTPUTS
 % prior          : Prior map updated
@@ -25,6 +25,7 @@ if isKey(qrs.config,'Sill')
 else
     sill= 5;
 end
+
 if isKey(qrs.config,'Function') && strcmp(qrs.config('Function'), 'sph')
     func= 'spherical';
 elseif (isKey(qrs.config,'Function') && strcmp(qrs.config('Function'), 'lin')) || ~isKey(qrs.config,'Function')
@@ -34,42 +35,48 @@ end
 
 for i=1: size(coords,1)
     [~, closestValueIndex] = min(abs(temperatureV- samples(i)));
+    y = 1:ly;
+    Y= y(ones(1,lx),:);
+    Y= Y(:);
+    x= 1:lx;
+    x= x';
+    X= x(:, ones(ly,1));
+    X= X(:);
+    Coord= coords(i*ones(lx*ly,1),:);
+    Distances= sqrt(sum((Coord-[((X-1).*delta)+delta/2 ((Y-1)*delta)+delta/2]).^2, 2));
     
-    for rows= 1:size(prior,1)
-        for cols= 1:size(prior,2)
-            
-            currentDistance= sqrt(sum(([coords(i,2) coords(i,1)]- [(((rows-1)*delta)+delta/2) (((cols-1)*delta)+delta/2)]).^2));
-            
-            if strcmp(func, 'spherical')
-                if currentDistance <= range
-                    sigma_= .01 + (sill*(1.5*(currentDistance/range)-.5*(currentDistance/range)^3));
-                else
-                    sigma_= .01+ sill;
-                end
-            elseif strcmp(func, 'linear')
-                sigma_= .01 + currentDistance*(sill/range);
-            end
-            likelihoodCurrentCell= exp(-0.5 * ((temperatureV - temperatureV(closestValueIndex))./sigma_).^2) ./ (sqrt(2*pi) .* sigma_);
-            %likelihoodCurrentCell= normpdf( temperatureV, temperatureV(closestValueIndex), varianceFunction);
-            likelihoodCurrentCell= likelihoodCurrentCell./sum(likelihoodCurrentCell);
-            %compute posterior current cell
-            evidence= sum(likelihoodCurrentCell.*reshape(prior(rows,cols,:), 1, size(prior,3)));
-            if evidence ~= 0
-                post= (likelihoodCurrentCell.*reshape(prior(rows,cols,:), 1, size(prior,3)))./evidence;
-            else
-                post= reshape(prior(rows,cols,:), 1, size(prior,3));
-            end
-            
-            posterior(rows,cols,:)= reshape(post, 1,1, size(posterior,3));
-            %update mutual information
-            %xEntropy= entropy (reshape(prior(x_,y_,:), 1, size(prior,3)));
-            RVprobability= reshape(posterior(rows,cols,:), 1, size(posterior,3));
-            xyEntropy= sum(-RVprobability(RVprobability> 0).*log2(RVprobability(RVprobability> 0)));
-            mutualInfo(rows,cols)= xyEntropy;
-            %update prior with computed posterior
-            prior(rows,cols,:)= posterior(rows,cols,:);        
-        end
+    if strcmp(func, 'spherical')
+        sigmas_= (Distances<= range).*(.01 + (sill.*(1.5.*(Distances/range)-.5.*(Distances/range).^3))) + (Distances> range).*(.01+ sill);
+    elseif strcmp(func, 'linear')
+        sigmas_= .01 + Distances.*(sill/range);
     end
+    %
+    val1 = (temperatureV - temperatureV(closestValueIndex));
+    val1= val1(ones(1,length(sigmas_)),:);
+    val2= (sqrt(2*pi));
+    val2= val2(ones(1,length(sigmas_)))';
+    Sigmas_= sigmas_(:,ones(1,size(val1,2)));
+    denominator= (val2 .* sigmas_);
+    denominator= denominator(:,ones(1,size(val1,2)));
+    likelihood= exp(-0.5 .* (val1./Sigmas_).^2) ./ denominator;
+    normFactor= sum(likelihood,2);
+    normFactor= normFactor(:,ones(1,size(likelihood,2)));
+    likelihood= likelihood./normFactor;
+    
+    evidence= sum((likelihood.*prior), 2);
+    evidence= evidence(:,ones(size(likelihood,2),1));
+    
+    posterior= (evidence~= 0).*((likelihood.*prior)./evidence) + (evidence== 0).*(prior);
+    
+    mutualInfoVector= zeros(lx*ly, 1);
+    for j= 1:size(posterior,1)
+        RVProb= posterior(j,:);
+        mutualInfoVector(j)= sum(-RVProb(RVProb~= 0).*log2(RVProb(RVProb~= 0)));
+    end
+    mutualInfo= reshape(mutualInfoVector, ly, lx);
+    mutualInfo= mutualInfo';
+
+    prior= posterior;
     
     
 end

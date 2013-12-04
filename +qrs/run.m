@@ -3,6 +3,7 @@ function run(varargin)
 %   QRS.RUN(C1,V1,...,CN,VN) starts a simulation with a configuration
 %   specified by the provided C = V pairs of config keys and values.
 
+clearvars -global QRS_CONFIG
 qrs.configuration.set(varargin{:});
 
 % initialize RNGs
