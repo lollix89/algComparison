@@ -108,7 +108,7 @@ end
 
 %% loop
 while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 3060) ...
-        || ((strcmp('sampleOnly', strategy)|| strcmp('random', strategy)) && iter <= 150)...
+        || ((strcmp('sampleOnly', strategy)|| strcmp('random', strategy)) && iter <= 200)...
         ||  (strcmp('spiral',strategy) && size(spiralPath,1) > 1)
     display(iter)
     %Get sampling points
@@ -263,9 +263,9 @@ function saveResults(strategy, distance, RMSE)
 if strcmp(strategy, 'ACO') || strcmp(strategy,'greedy')
     distance= distance(1:end-1);
     RMSE=interp1(distance,RMSE,0:50:3000,'linear','extrap');   
-    dlmwrite([qrs.config('DataDirectory') '_' qrs.config('TaskID')],[0:50:3000; RMSE]','-append');
+    dlmwrite([qrs.config('DataDirectory') '_' num2str(randi(1e+10,1))],[0:50:3000; RMSE]','-append');
 else
-    dlmwrite([qrs.config('DataDirectory') '_' qrs.config('TaskID')],[1:150; RMSE]', '-append');
+    dlmwrite([qrs.config('DataDirectory') '_' num2str(randi(1e+10,1))],[1:200; RMSE]', '-append');
 end
 
 end

@@ -23,7 +23,6 @@ do
     	JOB_ID=$( ./qjob -N "$JOB_NAME" -t 1-$NUM_RUNS ./scripts/qrs.sub \
     		"'Cluster',true,"               \
     		"'DataDirectory','$DATA_DIR',"  \
-            "'TaskID','$SGE_TASK_ID'," \
     		"'FieldRange',20,"              \
     		"'Algorithm','mutualInfo',"		\
     		"'Strategy','greedy',"		    \
@@ -38,7 +37,6 @@ do
     	JOB_ID=$( ./qjob -N "$JOB_NAME" -t 1-$NUM_RUNS ./scripts/qrs.sub \
     		"'Cluster',true,"               \
     		"'DataDirectory','$DATA_DIR',"  \
-            "'TaskID','$SGE_TASK_ID'," \
     		"'FieldRange',40,"              \
     		"'Algorithm','mutualInfo',"		\
     		"'Strategy','greedy',"		    \
@@ -54,7 +52,6 @@ do
     	JOB_ID=$( ./qjob -N "$JOB_NAME" -t 1-$NUM_RUNS ./scripts/qrs.sub \
     		"'Cluster',true,"               \
     		"'DataDirectory','$DATA_DIR',"  \
-            "'TaskID','$SGE_TASK_ID'," \
     		"'FieldRange',50,"              \
     		"'Algorithm','mutualInfo',"		\
     		"'Strategy','greedy',"		    \
