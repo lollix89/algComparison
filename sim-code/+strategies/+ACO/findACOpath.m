@@ -1,4 +1,4 @@
-function bestPath= findACOpath(distanceTree, pathLength)
+function bestPath= findACOpath(nodes,nextNodes,errors,pheromones, pathLength)
 
 m= 10;               %number of ants.
 minPh= 0.01;         %minimum pheromone concentration
@@ -31,24 +31,24 @@ while sum(ismember(cell2mat(visitedNodeIndexes), mostCommonPath, 'rows'))/m < .8
     for I= listAnts
         currentLength=1;
         while currentLength <= pathLength
-            nextNodes= distanceTree(currentNodeIndex(I)).nextNode(3,:);
-            neighbourNodeIndexes= nextNodes;
-            localIndexes= 1:length(neighbourNodeIndexes);     
+            endChildIdx= sum(nodes(3,1:currentNodeIndex(I)));
+            nextNodeIdxs= endChildIdx-nodes(3,currentNodeIndex(I))+1:endChildIdx;
+            %nextNodes= distanceTree(currentNodeIndex(I)).nextNode(3,:);
+%             neighbourNodeIndexes= nextNodes;
+%             localIndexes= 1:length(neighbourNodeIndexes);     
 %              localIndexes= find(~ismember(nextNodes,visitedNodeIndexes{I})==1);
 %              neighbourNodeIndexes= nextNodes(~ismember(nextNodes,visitedNodeIndexes{I}));
-%             if(length(localIndexes)~= length(nextNodes))
-%                disp('debug') 
-%             end
+
             
             %[neighbourNodeIndexes, localIndxes]= setdiff(distanceTree(currentNodeIndex(I)).nextNode(3,:), visitedNodeIndexes{I})
             %Handle the case where the ant gets to a dead end path.
-            if isempty(neighbourNodeIndexes)
+            if isempty(nextNodeIdxs)
                 listAnts= listAnts(listAnts~=I);
                 if isempty(listAnts)
                     pathLength=0;
                 end
             else
-                Q= distanceTree(currentNodeIndex(I)).pheromone(localIndexes);%.^alpha.* distanceTree(currentNodeIndex(I)).error(localIndxes).^beta;
+                Q= pheromones(nextNodeIdxs);%.^alpha.* distanceTree(currentNodeIndex(I)).error(localIndxes).^beta;
                 p= Q./sum(Q);
 %                 if any(distanceTree(currentNodeIndex(I)).pheromone(:)== 1)
 %                     disp('edge saturated')
@@ -57,44 +57,36 @@ while sum(ismember(cell2mat(visitedNodeIndexes), mostCommonPath, 'rows'))/m < .8
                 %We select a random Node with probability p
                 [p,sortindex]= sort(p, 2, 'descend');
                 %Shuffle together because they need to be in correspondence
-                packedIndexes= [neighbourNodeIndexes; localIndexes];
-                OrderedNeighbourNodesIndexes = packedIndexes(:,sortindex);
-                choosenIdx= OrderedNeighbourNodesIndexes(:, find( rand()< cumsum(p),1));
-                fitnesses(I)= fitnesses(I) + distanceTree(currentNodeIndex(I)).error(choosenIdx(2));
+                OrderednextNodeIdxs = nextNodeIdxs(sortindex);
+                nextNodeIdxIdx= OrderednextNodeIdxs(:, find( rand()< cumsum(p),1));
+                nextNodeIdx= nextNodes(nextNodeIdxIdx);
+                fitnesses(I)= fitnesses(I) + errors(nextNodeIdxIdx);
                 
-                %Save outerIdx + innerNextNodeIdx for updating fitness
-                fitnessUpdatePath{I}= [fitnessUpdatePath{I} [currentNodeIndex(I); choosenIdx(2)]];
+                %Save for updating fitness
+                fitnessUpdatePath{I}(end+1)= nextNodeIdxIdx;
                 
-                currentNodeIndex(I) = choosenIdx(1);
+                currentNodeIndex(I) = nextNodeIdx;
                 visitedNodeIndexes{I}(end+1)= currentNodeIndex(I);
                 
             end
             currentLength=currentLength+1;
         end
         fitnesses(I)= fitnesses(I)/pathLength;
-        %disp(['Ant ' num2str(I) ' found path with following indexes ' num2str(visitedNodeIndexes{I}) ' and fitness ' num2str(fitnesses(I))])
     end
     %Find best path found so far
     [currentBestFitness,currentBestAnt]= max(fitnesses);
     if currentBestFitness> bestFitness
-        %disp(['Best path found so far from ant ' num2str(currentBestAnt) ' with fitness ' num2str(currentBestFitness)])
         bestpathIdxes = visitedNodeIndexes{currentBestAnt};
         bestFitness= currentBestFitness;
     end
     %Evaporate pheromone
-    for j= 1: length(distanceTree)
-        distanceTree(j).pheromone= max(minPh, (1-rho).* distanceTree(j).pheromone);
-    end
-    %Update pheromone
-    for I = 1:m
-        for j=1:length(fitnessUpdatePath{I})
-            distanceTree(fitnessUpdatePath{I}(1,j)).pheromone(fitnessUpdatePath{I}(2,j))= ...
-                min(maxPh, distanceTree(fitnessUpdatePath{I}(1,j)).pheromone(fitnessUpdatePath{I}(2,j))+ (mu* fitnesses(I)));
-            %Extra reinforcement for best tour found so far (elitism)
-            if isequal(I, currentBestAnt)
-                distanceTree(fitnessUpdatePath{currentBestAnt}(1,j)).pheromone(fitnessUpdatePath{currentBestAnt}(2,j))= ...
-                    min(maxPh, distanceTree(fitnessUpdatePath{currentBestAnt}(1,j)).pheromone(fitnessUpdatePath{currentBestAnt}(2,j))+ (mu* fitnesses(currentBestAnt)));
-            end
+    pheromones= max(minPh, (1-rho).* pheromones);
+    
+    %Update pheromone    
+    for I= 1:m
+        pheromones(fitnessUpdatePath{I})= min(maxPh, pheromones(fitnessUpdatePath{I})+ (mu* fitnesses(I)));
+        if isequal(I, currentBestAnt)
+            pheromones(fitnessUpdatePath{I})= min(maxPh, pheromones(fitnessUpdatePath{I})+ (mu* fitnesses(I)));
         end
     end
     
@@ -103,13 +95,12 @@ while sum(ismember(cell2mat(visitedNodeIndexes), mostCommonPath, 'rows'))/m < .8
     modeIdx = mode(uIdx);
     mostCommonPath = uA(modeIdx,:);
     iter= iter +1;
-    %disp(['Percentage of converged ants is  ' num2str((sum(ismember(cell2mat(visitedNodeIndexes), mostCommonPath, 'rows'))/m)*100) ' %'])
 end
-
+% 
 % if iter < maxIterations
 %     disp(['ACO converged in ' num2str(toc) ' seconds and ' num2str(iter) ' iterations!'])
 % end
 % disp([num2str(toc) ' seconds '])
-bestPath= cat(1, distanceTree(bestpathIdxes).currentNode);
+bestPath= nodes(1:2,bestpathIdxes)';
 
 end

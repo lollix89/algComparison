@@ -158,8 +158,8 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
             %Compute the best path by using the ACO algorithm
             Map= nan(Lx,Ly);
             Map(x_,y_)= errorMap;
-            distanceTree= strategies.ACO.generateACODistanceMatrix(posX, posY, Lx, Ly, Map, allowableDirections, horizon, nWayPoints);
-            path= strategies.ACO.findACOpath(distanceTree, nWayPoints); 
+            [nodes,nextNodeIdxs,errors,pheromones]= strategies.ACO.generateACODistanceMatrix(posX, posY, Lx, Ly, Map, allowableDirections, horizon, nWayPoints);
+            path= strategies.ACO.findACOpath(nodes,nextNodeIdxs,errors,pheromones, nWayPoints); 
             posX= path(end,1);
             posY= path(end,2);
             
