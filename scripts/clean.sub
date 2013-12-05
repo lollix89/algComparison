@@ -19,4 +19,4 @@
 # specify working directory
 #$ -cwd
 
-./scripts/template "find $2 -type f -exec cat {} \\; > $1 && rm -rf $2"
+cat $1* > $1 && rm $1'_'*

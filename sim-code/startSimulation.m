@@ -262,10 +262,10 @@ function saveResults(strategy, distance, RMSE)
 
 if strcmp(strategy, 'ACO') || strcmp(strategy,'greedy')
     distance= distance(1:end-1);
-    RMSE=interp1(distance,RMSE,0:50:3000,'linear','extrap');
-    dlmwrite(qrs.config('DataDirectory'),[0:50:3000; RMSE]','-append');
+    RMSE=interp1(distance,RMSE,0:50:3000,'linear','extrap');   
+    dlmwrite([qrs.config('DataDirectory') '_' qrs.config('TaskID')],[0:50:3000; RMSE]','-append');
 else
-    dlmwrite(qrs.config('DataDirectory'),[1:150; RMSE]', '-append');
+    dlmwrite([qrs.config('DataDirectory') '_' qrs.config('TaskID')],[1:150; RMSE]', '-append');
 end
 
 end

@@ -23,12 +23,14 @@ do
     	JOB_ID=$( ./qjob -N "$JOB_NAME" -t 1-$NUM_RUNS ./scripts/qrs.sub \
     		"'Cluster',true,"               \
     		"'DataDirectory','$DATA_DIR',"  \
+            "'TaskID','$SGE_TASK_ID'," \
     		"'FieldRange',20,"              \
     		"'Algorithm','mutualInfo',"		\
     		"'Strategy','greedy',"		    \
     		"'Function','$j',"		    \
     		"'Sill','$i',"		    \
     		"'FieldModel','$FIELD_MODEL'"  )
+        ./qclean $JOB_ID "$DATA_DIR" > /dev/null
 
     	SUB_NAME="${i}_${j}_medium_range"
     	eval JOB_NAME=$JOB_NAME_PATTERN
@@ -36,12 +38,15 @@ do
     	JOB_ID=$( ./qjob -N "$JOB_NAME" -t 1-$NUM_RUNS ./scripts/qrs.sub \
     		"'Cluster',true,"               \
     		"'DataDirectory','$DATA_DIR',"  \
+            "'TaskID','$SGE_TASK_ID'," \
     		"'FieldRange',40,"              \
     		"'Algorithm','mutualInfo',"		\
     		"'Strategy','greedy',"		    \
     		"'Function','$j',"		    \
     		"'Sill','$i',"		    \
     		"'FieldModel','$FIELD_MODEL'"  )
+        ./qclean $JOB_ID "$DATA_DIR" > /dev/null
+
 
     	SUB_NAME="${i}_${j}_long_range"
     	eval JOB_NAME=$JOB_NAME_PATTERN
@@ -49,12 +54,15 @@ do
     	JOB_ID=$( ./qjob -N "$JOB_NAME" -t 1-$NUM_RUNS ./scripts/qrs.sub \
     		"'Cluster',true,"               \
     		"'DataDirectory','$DATA_DIR',"  \
+            "'TaskID','$SGE_TASK_ID'," \
     		"'FieldRange',50,"              \
     		"'Algorithm','mutualInfo',"		\
     		"'Strategy','greedy',"		    \
     		"'Function','$j',"		    \
     		"'Sill','$i',"		    \
     		"'FieldModel','$FIELD_MODEL'"  )
+        ./qclean $JOB_ID "$DATA_DIR" > /dev/null
+
 
 	done
 done

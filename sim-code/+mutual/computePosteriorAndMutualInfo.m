@@ -68,11 +68,18 @@ for i=1: size(coords,1)
     
     posterior= (evidence~= 0).*((likelihood.*prior)./evidence) + (evidence== 0).*(prior);
     
-    mutualInfoVector= zeros(lx*ly, 1);
-    for j= 1:size(posterior,1)
-        RVProb= posterior(j,:);
-        mutualInfoVector(j)= sum(-RVProb(RVProb~= 0).*log2(RVProb(RVProb~= 0)));
-    end
+    %Add a small bias to make possible to compute entropy with indexing,otherwise
+    %it would take much longer
+    posterior= posterior+ 1e-200;
+    normalizationFactor= sum(posterior,2);
+    posterior= posterior./ normalizationFactor(:, ones(1,size(posterior,2)));
+    
+    mutualInfoVector= sum(-posterior.*log2(posterior),2);
+%     
+%     for j= 1:size(posterior,1)
+%         RVProb= posterior(j,:);
+%         mutualInfoVector(j)= sum(-RVProb(RVProb~= 0).*log2(RVProb(RVProb~= 0)));
+%     end
     mutualInfo= reshape(mutualInfoVector, ly, lx);
     mutualInfo= mutualInfo';
 
