@@ -50,9 +50,9 @@ for i=1: size(coords,1)
     elseif strcmp(func, 'linear')
         sigmas_= .01 + Distances.*(sill/range);
     elseif strcmp(func, 'quadratic')
-        sigmas_= .01+ Distances.^2;
+        sigmas_= .01+ (Distances.^2).*(sill/(range^2));
     elseif strcmp(func, 'cubic')
-        sigmas_= .01+ Distances.^3;
+        sigmas_= .01+ (Distances.^3).*(sill/(range^3));
     end
     
     val1 = (temperatureV - temperatureV(closestValueIndex));
