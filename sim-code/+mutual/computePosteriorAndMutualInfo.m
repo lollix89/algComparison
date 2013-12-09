@@ -26,9 +26,9 @@ else
     sill= 5;
 end
 
-if isKey(qrs.config,'Function') && strcmp(qrs.config('Function'), 'sph')
-    func= 'spherical';
-elseif (isKey(qrs.config,'Function') && strcmp(qrs.config('Function'), 'lin')) || ~isKey(qrs.config,'Function')
+if isKey(qrs.config,'Function')
+    func= qrs.config('Function');    
+elseif ~isKey(qrs.config,'Function')
     func= 'linear';
 end
 
@@ -49,8 +49,12 @@ for i=1: size(coords,1)
         sigmas_= (Distances<= range).*(.01 + (sill.*(1.5.*(Distances/range)-.5.*(Distances/range).^3))) + (Distances> range).*(.01+ sill);
     elseif strcmp(func, 'linear')
         sigmas_= .01 + Distances.*(sill/range);
+    elseif strcmp(func, 'quadratic')
+        sigmas_= .01+ Distances.^2;
+    elseif strcmp(func, 'cubic')
+        sigmas_= .01+ Distances.^3;
     end
-    %
+    
     val1 = (temperatureV - temperatureV(closestValueIndex));
     val1= val1(ones(1,length(sigmas_)),:);
     val2= (sqrt(2*pi));
