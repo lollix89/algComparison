@@ -1,7 +1,6 @@
 *.m~
-m*
-k*
 .DS*
 Plot*
 comparisons
 HotSpot*
+data

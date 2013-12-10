@@ -4,7 +4,7 @@ function startSimulation(algorithm, strategy)
 %%          -'mutualInfo': uses mutual information map to move around
 
 %%STRATEGY: 
-%%          -"sampleOnly": samples map in the point corresponding to the maximum error.
+%%          -"sample": samples map in the point corresponding to the maximum error.
 %%          -"ACO": uses ACO to find the path that maximizes the mean error within the path
 %%          -"greedy": similar to ACO but always chooses the path with the highest error
 %%          -"random": samples randomly in the map without considering the error
@@ -15,7 +15,6 @@ function startSimulation(algorithm, strategy)
 %%      both algorithms use kriging as interpolation strategy.
 %%      when using strategy "random" or "spiral" the algorithm used doesn't matter.  
 %%      for every run the position of the robot is random and so is the position of the unique static sensor.
-
 close all;
 plotOn= 0;
 
@@ -24,7 +23,7 @@ field=fields.gaussian.generate('spherical',300,1,[25 25 0 qrs.config('FieldRange
 %Get config parameters
 fieldRange= qrs.config('FieldRange');
 
-[Ly,Lx]=size(field);
+[Ly,Lx]= size(field);
 
 %Points where the error is computed
 delta= 5;
@@ -47,13 +46,12 @@ grid= nan(Lx,Ly);
 
 posX= randi([1 300]);
 posY= randi([1 300]);
-
 speedHeli= 3.7;
 allowableDirections= 9;
 horizon= 20;
 measPeriod= 3;
-distance=0;
-h0=0;
+distance= 0;
+h0= 0;
 
 %Simulation parameters:
 %   -root mean square error
@@ -108,7 +106,7 @@ end
 
 %% loop
 while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 3060) ...
-        || ((strcmp('sampleOnly', strategy)|| strcmp('random', strategy)) && iter <= 200)...
+        || ((strcmp('sample', strategy)|| strcmp('random', strategy)) && iter <= 200)...
         ||  (strcmp('spiral',strategy) && size(spiralPath,1) > 1)
     display(iter)
     %Get sampling points
@@ -177,7 +175,7 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
             posY= path(end,2);
             
             [Pts2visit, distance(iter+1), h0] = strategies.findPtsAlongPath(path, speedHeli, measPeriod, distance(iter),h0);
-        case 'sampleOnly'
+        case 'sample'
             %%
             %Assume the robot moves with infinite velocity to the point
             %where the error is the highest, therefore, this strategy
@@ -257,8 +255,7 @@ axis([-3 303 -3 303])
 end
 
 function saveResults(strategy, distance, RMSE)
-%%Interpolate the RMSE and save it to a file or just save it to a file if
-%%using random or sample only strategy. 
+%%Save the simulation results to a file
 
 if strcmp(strategy, 'ACO') || strcmp(strategy,'greedy')
     distance= distance(1:end-1);

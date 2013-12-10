@@ -1,4 +1,25 @@
 function [arrivalPoints,tBoundaries]= findAllowableTriangles(Sx, Sy, fieldX, fieldY, allowableDirections, horizon)
+%This function computes the arrival points from the current robot position
+%considering the number of possible directions. The function computes also
+%the boundaries of all the triangles used to compute the mean error.
+
+%Input: 
+%       Sx,Sy:                  Current position of the robot
+%       fieldX, fieldY:         Extension of the field
+%       allowableDirections:    Number of directions allowed from the
+%                               current position
+
+%output:
+%       arrivalPoints:          Coordinates of arrival points already
+%                               cropped to respect the boundaries. The
+%                               arrival points not respecting the
+%                               boundaries are returned as nan.
+%       tBoundaries:            Boundaries of the triangles for each
+%                               allowed directions. The number of tBoundaries is always the double
+%                               of the arrivalPoints, since every direction
+%                               has two boundaries. If an arrival point is
+%                               nan the two respective boundaries are nan
+
 
 triangleAngle= 360/allowableDirections;
 directionAngles= 0:triangleAngle:359;
@@ -33,5 +54,4 @@ for i= 1:size(arrivalPoints,2)
 end
 arrivalPoints(:,deleteIdxArrival)= nan;
 tBoundaries(:,deleteIdxTriangles)= nan;
-
 end

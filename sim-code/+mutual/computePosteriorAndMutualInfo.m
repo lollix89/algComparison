@@ -6,14 +6,14 @@ function [prior, posterior, mutualInfo]= computePosteriorAndMutualInfo(prior, po
 % INPUT
 % prior          : grid of the prior
 % posterior      : grid of the posterior
-% mutualInfo     : grid of the muutal information
+% mutualInfo     : grid of the mutal information
 % temperatureV   : the vector of temperatures
 % samples        : samples of current iteration
-% coords         : coordinates of the smapling points given as x(columns),
+% coords         : coordinates of the sampling points given as x(columns),
 %                   y(rows) Nx2
 % range          : correlation range of the current field assumed to be
 %                   known
-% delta          : discretization interval for
+% delta          : discretization interval for probability distributions
 
 % OUTPUTS
 % prior          : Prior map updated
@@ -27,7 +27,7 @@ else
 end
 
 if isKey(qrs.config,'Function')
-    func= qrs.config('Function');    
+    func= qrs.config('Function');
 elseif ~isKey(qrs.config,'Function')
     func= 'linear';
 end
@@ -45,6 +45,8 @@ for i=1: size(coords,1)
     Coord= coords(i*ones(lx*ly,1),:);
     Distances= sqrt(sum((Coord-[((X-1).*delta)+delta/2 ((Y-1)*delta)+delta/2]).^2, 2));
     
+    %Choosing the variance function to be used according to the config
+    %variable set by arguments
     if strcmp(func, 'spherical')
         sigmas_= (Distances<= range).*(.01 + (sill.*(1.5.*(Distances/range)-.5.*(Distances/range).^3))) + (Distances> range).*(.01+ sill);
     elseif strcmp(func, 'linear')
@@ -79,16 +81,10 @@ for i=1: size(coords,1)
     posterior= posterior./ normalizationFactor(:, ones(1,size(posterior,2)));
     
     mutualInfoVector= sum(-posterior.*log2(posterior),2);
-%     
-%     for j= 1:size(posterior,1)
-%         RVProb= posterior(j,:);
-%         mutualInfoVector(j)= sum(-RVProb(RVProb~= 0).*log2(RVProb(RVProb~= 0)));
-%     end
     mutualInfo= reshape(mutualInfoVector, ly, lx);
     mutualInfo= mutualInfo';
-
-    prior= posterior;
     
+    prior= posterior;
     
 end
 

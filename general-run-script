@@ -1,65 +1,53 @@
 #!/bin/bash
 
-if [ $# -ne 1 ]; then
-    echo "Usage: run-example name" >&2
+if [ $# -ne 2 ]; then
+    echo "Usage: run-example approach Strategy      \
+                   approach: [kriging mutualInfo]       \
+                   Strategy: [greedy ACO sample random]" >&2
     exit 2
 fi
 
 
-JOB_NAME_PATTERN="$1_\$SUB_NAME"
+JOB_NAME_PATTERN="$2_\$SUB_NAME"
 DATA_DIR_PATTERN="./data/\$JOB_NAME"
 
 FIELD_MODEL="spherical"
-FUNCTION=('sph' 'lin')
-NUM_RUNS=1000
+NUM_RUNS=500
 
-for i in $(seq 4 3 46)
-do
-	for j in "${FUNCTION[@]}"
-    do
-    	SUB_NAME="${i}_${j}_short_range"
+    	SUB_NAME="short_range"
     	eval JOB_NAME=$JOB_NAME_PATTERN
     	eval DATA_DIR=$DATA_DIR_PATTERN
     	JOB_ID=$( ./qjob -N "$JOB_NAME" -t 1-$NUM_RUNS ./scripts/qrs.sub \
     		"'Cluster',true,"               \
     		"'DataDirectory','$DATA_DIR',"  \
     		"'FieldRange',20,"              \
-    		"'Algorithm','mutualInfo',"		\
-    		"'Strategy','greedy',"		    \
-    		"'Function','$j',"		    \
-    		"'Sill','$i',"		    \
-    		"'FieldModel','$FIELD_MODEL'"  )
+    		"'Algorithm','$1',"		\
+    		"'Strategy','$2',"		    \
+		"'FieldModel','$FIELD_MODEL'"  )
         ./qclean $JOB_ID "$DATA_DIR" > /dev/null
 
-    	SUB_NAME="${i}_${j}_medium_range"
+
+    	SUB_NAME="medium_range"
     	eval JOB_NAME=$JOB_NAME_PATTERN
     	eval DATA_DIR=$DATA_DIR_PATTERN
     	JOB_ID=$( ./qjob -N "$JOB_NAME" -t 1-$NUM_RUNS ./scripts/qrs.sub \
     		"'Cluster',true,"               \
     		"'DataDirectory','$DATA_DIR',"  \
     		"'FieldRange',40,"              \
-    		"'Algorithm','mutualInfo',"		\
-    		"'Strategy','greedy',"		    \
-    		"'Function','$j',"		    \
-    		"'Sill','$i',"		    \
+    		"'Algorithm','$1',"		\
+    		"'Strategy','$2',"		    \
     		"'FieldModel','$FIELD_MODEL'"  )
         ./qclean $JOB_ID "$DATA_DIR" > /dev/null
 
 
-    	SUB_NAME="${i}_${j}_long_range"
+    	SUB_NAME="long_range"
     	eval JOB_NAME=$JOB_NAME_PATTERN
     	eval DATA_DIR=$DATA_DIR_PATTERN
     	JOB_ID=$( ./qjob -N "$JOB_NAME" -t 1-$NUM_RUNS ./scripts/qrs.sub \
     		"'Cluster',true,"               \
     		"'DataDirectory','$DATA_DIR',"  \
     		"'FieldRange',50,"              \
-    		"'Algorithm','mutualInfo',"		\
-    		"'Strategy','greedy',"		    \
-    		"'Function','$j',"		    \
-    		"'Sill','$i',"		    \
+    		"'Algorithm','$1',"		\
+    		"'Strategy','$2',"		    \
     		"'FieldModel','$FIELD_MODEL'"  )
         ./qclean $JOB_ID "$DATA_DIR" > /dev/null
-
-
-	done
-done

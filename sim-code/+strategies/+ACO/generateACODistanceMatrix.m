@@ -1,28 +1,35 @@
 function [nodes,nextNodeIdxs,errors,pheromones]= generateACODistanceMatrix(posX, posY, fieldX, fieldY, error, allowableDirections, horizon, nWayPoints)
+%This function generates on the fly all the points reachable from the
+%current position with a path of length nWayPoints, and returns a structure
+%of the tree used from findACO to compute the best path.
 
-p0= 0.01;
+%Input:
+%       posX, posY:             Current position of the robot
+%       fieldX, fieldY:         Dimensions of the field
+%       error:                  Error map
+%       allowableDirections:    Number of directions allowed from a current
+%                               point (nb increasing this values increases the commputational time since the number of reachable nodes increases)
+%       horizon:                Horizon of the robot, ie the length of the points considered to compute the mean error
+%       nWayPoints:             Length of the path
 
-%Generate all the positions reachable with a path of length nWayPoints
+
+p0= 0.01;       %Initial quantity of pheromone
 stack= [posX; posY];
-
 nodes=[];
-nextNodeIdxs=[];
 errors= [];
-pheromones=[];
+futureStack= [];
 
+%Find the boundaries to interpolate the error map only where needed to make the interpolation
+%faster
 lowerLimit= max(1, round(stack)- (horizon*(nWayPoints+2)));
 upperXLimit= min(fieldX, round(posX)+ (horizon*(nWayPoints+2)));
 upperYLimit= min(fieldY, round(posY)+ (horizon*(nWayPoints+2)));
 interpolatePatch= error(lowerLimit(2): upperYLimit, lowerLimit(1):upperXLimit);
 interpolatePatch= interpolate.interpolate(interpolatePatch);
 error(lowerLimit(2): upperYLimit, lowerLimit(1):upperXLimit)= interpolatePatch;
-
-%normalizing the error map
+%normalize the error map
 range = max(error(:)) - min(error(:));
 error = (error - min(error(:))) ./ range;
-
-futureStack= [];
-currentIdx= 2;
 
 for i= 1:nWayPoints +1
     parent= stack(:,1);
@@ -34,22 +41,15 @@ for i= 1:nWayPoints +1
         meanError(isnan(meanError))= [];
         arrivalPoints(3,:)= meanError;
         %Only leave the promising edges, those with an error higher that the
-        %mean of all the errors in order to save some computational time.
+        %mean of all the errors in order to save computational time.
         arrivalPoints= arrivalPoints(:, meanError> mean(meanError));
-                %%%%%%%%%%
-        arrivalPoints= arrivalPoints(:,~ismember(arrivalPoints(1:2,:)',parent','rows'));
-                
+        %Delete parent node from the list of children of current nodes
+        arrivalPoints= arrivalPoints(:,~ismember(arrivalPoints(1:2,:)',parent','rows'));        
         meanError= arrivalPoints(3,:);
         arrivalPoints= arrivalPoints(1:2,:);
         
         nodes(:,end+1)= [stack(:,1); length(meanError)];
         errors=[errors meanError];
-        
-%         nodes(end).error= meanError;
-%         nodes(end).pheromone= p0.*ones(1,length(meanError));
-%         nodes(end).nextNode= [arrivalPoints; currentIdx:currentIdx+length(meanError)-1];
-        
-        currentIdx= currentIdx+length(meanError);
         futureStack= [ futureStack arrivalPoints];
         stack(:,1)= [];
     end
