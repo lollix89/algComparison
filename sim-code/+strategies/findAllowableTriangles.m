@@ -24,7 +24,9 @@ function [arrivalPoints,tBoundaries]= findAllowableTriangles(Sx, Sy, fieldX, fie
 triangleAngle= 360/allowableDirections;
 directionAngles= 0:triangleAngle:359;
 triangleAngles= -(triangleAngle/2): triangleAngle: 359;
-triangleAngles= kron(triangleAngles,ones(1,2));
+triangleAngles= triangleAngles(ones(1,2),:);
+triangleAngles= triangleAngles(:)';
+
 triangleAngles= triangleAngles(2:end-1);
 
 arrivalPoints= [Sx + cosd(directionAngles)*horizon; Sy + sind(directionAngles)*horizon] ;

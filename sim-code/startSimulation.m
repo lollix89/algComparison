@@ -1,9 +1,9 @@
 function startSimulation(algorithm, strategy)
-%%ALGORITHM: 
-%%          -'kriging': uses the kriging error map to move around . 
+%%ALGORITHM:
+%%          -'kriging': uses the kriging error map to move around .
 %%          -'mutualInfo': uses mutual information map to move around
 
-%%STRATEGY: 
+%%STRATEGY:
 %%          -"sample": samples map in the point corresponding to the maximum error.
 %%          -"ACO": uses ACO to find the path that maximizes the mean error within the path
 %%          -"greedy": similar to ACO but always chooses the path with the highest error
@@ -11,9 +11,9 @@ function startSimulation(algorithm, strategy)
 %%          -"spiral": moves on a spiral path. (commented)
 
 
-%%OSS: 
+%%OSS:
 %%      both algorithms use kriging as interpolation strategy.
-%%      when using strategy "random" or "spiral" the algorithm used doesn't matter.  
+%%      when using strategy "random" or "spiral" the algorithm used doesn't matter.
 %%      for every run the position of the robot is random and so is the position of the unique static sensor.
 close all;
 plotOn= 0;
@@ -86,22 +86,24 @@ samplingP= [station; round([posX posY])];
 grid(sub2ind(size(grid), samplingP(:,2), samplingP(:,1))) = field(sub2ind(size(field), samplingP(:,2), samplingP(:,1)));
 
 if strcmp(algorithm, 'mutualInfo')
-    [prior,posterior,mutualInfo, temperatureVector]= mutual.initializeProbabilities(lx_, ly_); 
+    [prior,posterior,mutualInfo, temperatureVector]= mutual.initializeProbabilities(lx_, ly_);
 end
 % if strcmp(strategy, 'spiral')
-%     len= length(px);
+%     posX= 1;
+%     posY= 1;
+%     len= Lx;
 %     start= 1;
 %     spiralPath=[];
 %     while len> start
-%         spiralPath= [spiralPath; px(start) py(start)];
-%         spiralPath=[spiralPath; px(start+1:len)' [ones(len-start,1).* py(start)]];
-%         spiralPath=[spiralPath; [ones(len-start,1).*px(len)] py(start+1:len)'];
-%         spiralPath=[spiralPath; px(len-1:-1:start)' [ones(len-start,1).*py(len)]];
-%         spiralPath=[spiralPath; [ones(len-start-1,1).*px(start)] py(len-1:-1:start+1)'];
+%         spiralPath= [spiralPath; Lx(start) Ly(start)];
+%         spiralPath=[spiralPath; Lx(start+1:len)' ones(len-start,1).* Ly(start)];
+%         spiralPath=[spiralPath; ones(len-start,1).*Lx(len) Ly(start+1:len)'];
+%         spiralPath=[spiralPath; Lx(len-1:-1:start)' ones(len-start,1).*Ly(len)];
+%         spiralPath=[spiralPath; ones(len-start-1,1).*Lx(start) Ly(len-1:-1:start+1)'];
 %         start= start+1;
 %         len= len-1;
 %     end
-%     spiralPath= [spiralPath; px(start) py(start)];
+%     spiralPath= [spiralPath; Lx(start) Ly(start)];
 % end
 
 %% loop
@@ -110,9 +112,9 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
         ||  (strcmp('spiral',strategy) && size(spiralPath,1) > 1)
     display(iter)
     %Get sampling points
-    X=[];   
+    X=[];
     [X(:,2),X(:,1)]= ind2sub(size(grid), find(~isnan(grid)));   %sampling position as x(cols), y(rows)
-    Y= grid(sub2ind(size(grid), X(:,2),X(:,1)));                %sampled values 
+    Y= grid(sub2ind(size(grid), X(:,2),X(:,1)));                %sampled values
     
     switch algorithm
         case 'kriging'
@@ -150,14 +152,14 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
     end
     
     RMSE(iter) = sqrt(mean(mean((interpMap - field(x_,y_)).^2)));
-    switch strategy 
+    switch strategy
         case 'ACO'
             %%
             %Compute the best path by using the ACO algorithm
             Map= nan(Lx,Ly);
             Map(x_,y_)= errorMap;
             [nodes,nextNodeIdxs,errors,pheromones]= strategies.ACO.generateACODistanceMatrix(posX, posY, Lx, Ly, Map, allowableDirections, horizon, nWayPoints);
-            path= strategies.ACO.findACOpath(nodes,nextNodeIdxs,errors,pheromones, nWayPoints); 
+            path= strategies.ACO.findACOpath(nodes,nextNodeIdxs,errors,pheromones, nWayPoints);
             posX= path(end,1);
             posY= path(end,2);
             
@@ -169,8 +171,8 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
             
             Map= nan(Lx,Ly);
             Map(x_,y_)= errorMap;
-                
-            path= strategies.greedy.greedy(posX, posY, Lx, Ly, Map, allowableDirections, horizon, nWayPoints); 
+            
+            path= strategies.greedy.greedy(posX, posY, Lx, Ly, Map, allowableDirections, horizon, nWayPoints);
             posX= path(end,1);
             posY= path(end,2);
             
@@ -181,7 +183,7 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
             %where the error is the highest, therefore, this strategy
             %doesn't need a moving strategy.
             Map= nan(Lx,Ly);
-            Map(x_,y_)= errorMap; 
+            Map(x_,y_)= errorMap;
             [~, idx]= max(Map(:));
             [y,x]= ind2sub(size(Map), idx);
             Pts2visit= [x y];
@@ -199,15 +201,15 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
             availablePositionIndexes(randIdx,1);
             [y, x]= ind2sub(size(availablePositionMatrix), availablePositionIndexes(randIdx,1));
             Pts2visit= [x y];
-%         case 'spiral'
-%             if size(spiralPath,1)>= nWayPoints
-%                 path= spiralPath(1:nWayPoints,:);
-%             else
-%                 path= spiralPath(1:end,:);
-%             end
-%             [Pts2visit,distance(iter+1),h0] = findPtsAlongPath(path, speedHeli, measPeriod,distance(iter),h0);
-%             spiralPath= spiralPath(size(path,1)+1:end,:);
-
+            %         case 'spiral'
+            %             if size(spiralPath,1)>= nWayPoints
+            %                 path= spiralPath(1:nWayPoints,:);
+            %             else
+            %                 path= spiralPath(1:end,:);
+            %             end
+            %             [Pts2visit,distance(iter+1),h0] = findPtsAlongPath(path, speedHeli, measPeriod,distance(iter),h0);
+            %             spiralPath= spiralPath(size(path,1)+1:end,:);
+            
     end
     %Add sampled points to the grid
     if ~isempty(Pts2visit)
@@ -259,7 +261,7 @@ function saveResults(strategy, distance, RMSE)
 
 if strcmp(strategy, 'ACO') || strcmp(strategy,'greedy')
     distance= distance(1:end-1);
-    RMSE=interp1(distance,RMSE,0:50:3000,'linear','extrap');   
+    RMSE=interp1(distance,RMSE,0:50:3000,'linear','extrap');
     dlmwrite([qrs.config('DataDirectory') '_' num2str(randi(1e+10,1))],[0:50:3000; RMSE]','-append');
 else
     dlmwrite([qrs.config('DataDirectory') '_' num2str(randi(1e+10,1))],[1:200; RMSE]', '-append');

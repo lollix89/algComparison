@@ -70,9 +70,11 @@ for i=1: size(coords,1)
     likelihood= likelihood./normFactor;
     
     evidence= sum((likelihood.*prior), 2);
+    %adding small bias to avid zero evidence case (performance reasons)
+    evidence= evidence+ 1e-200;
     evidence= evidence(:,ones(size(likelihood,2),1));
-    
-    posterior= (evidence~= 0).*((likelihood.*prior)./evidence) + (evidence== 0).*(prior);
+    posterior= (likelihood.*prior)./evidence;
+    %posterior= (evidence~= 0).*((likelihood.*prior)./evidence) + (evidence== 0).*(prior);
     
     %Add a small bias to make possible to compute entropy with indexing,otherwise
     %it would take much longer
