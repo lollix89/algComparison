@@ -23,7 +23,7 @@ function [prior, posterior, mutualInfo]= computePosteriorAndMutualInfo(prior, po
 if isKey(qrs.config,'Sill')
     sill= str2double(qrs.config('Sill'));
 else
-    sill= 5;
+    sill= 25;
 end
 
 if isKey(qrs.config,'Function')

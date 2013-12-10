@@ -110,7 +110,7 @@ end
 while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 3060) ...
         || ((strcmp('sample', strategy)|| strcmp('random', strategy)) && iter <= 200)...
         ||  (strcmp('spiral',strategy) && size(spiralPath,1) > 1)
-    display(iter)
+    %display(iter)
     %Get sampling points
     X=[];
     [X(:,2),X(:,1)]= ind2sub(size(grid), find(~isnan(grid)));   %sampling position as x(cols), y(rows)
