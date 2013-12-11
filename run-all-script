@@ -27,11 +27,6 @@ do
 		      "'FieldModel','$FIELD_MODEL'"  )
             ./qclean $JOB_ID "$DATA_DIR" > /dev/null
 
-
-            echo $k
-            echo $j
-            echo $i
-
 done
 
 done
