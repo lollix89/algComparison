@@ -44,7 +44,8 @@ for i=1:Ny
     h=sqrt((X(:,1)-x).^2+(X(:,2)-y).^2);
     
 
-    B(1:Nmeasures)=varioFun(modelParam,h);    
+    %B(1:Nmeasures)=varioFun(modelParam,h); 
+    B(1:Nmeasures)=varioModel(modelParam, h);
     
     %(h<param(2)).*(param(1)*(3.*h./(2*param(2))-1/2*(h./param(2)).^3))+(h>=param(2)).*(param(1));
     

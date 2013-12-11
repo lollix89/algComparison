@@ -18,8 +18,8 @@ lag=10;
 %fit variogram
 [fittedModel, fittedParam, best_RMSE] = kriging.adjust_vario(lags, varioVal);
 
-% %Plot fitted variogram
-% 
+%Plot fitted variogram
+
 %     figure
 %     plot(lags,varioVal, 'ok','MarkerFaceColor','b');hold on
 %     h_mod=linspace(0, range,100);

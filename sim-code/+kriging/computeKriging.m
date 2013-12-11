@@ -31,7 +31,7 @@ interpValues=interpValuesNorm.*stdV+meanV; % "Denormalize" interpolated values
 % ylabel('Y [m]','FontSize', 14)
 % colorbar
 % axis('equal')
-
+% 
 % figure
 % hold on
 % [daaa, ch]=contourf(x,y,krigError',30);hold on;

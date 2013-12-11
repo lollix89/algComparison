@@ -18,6 +18,7 @@ stack= [posX; posY];
 nodes=[];
 errors= [];
 futureStack= [];
+previousDirection= nan;
 
 %Find the boundaries to interpolate the error map only where needed to make the interpolation
 %faster
@@ -32,19 +33,19 @@ range = max(error(:)) - min(error(:));
 error = (error - min(error(:))) ./ range;
 
 for i= 1:nWayPoints +1
-    parent= stack(:,1);
     while ~isempty(stack)   
         [arrivalPoints, tBoundaries]= strategies.findAllowableTriangles(stack(1,1), stack(2,1), fieldX, fieldY , allowableDirections, horizon);
         meanError= strategies.computeMeanError(stack(1,1), stack(2,1), tBoundaries, error);
+        if ~isempty(nodes);
+            [arrivalPoints, meanError]= strategies.avoidSharpBendAndLoop(horizon, previousDirection, allowableDirections, arrivalPoints, meanError, nodes(1:2,:)');
+        end
         
         arrivalPoints(:, isnan(arrivalPoints(1,:)))= [];
         meanError(isnan(meanError))= [];
         arrivalPoints(3,:)= meanError;
         %Only leave the promising edges, those with an error higher that the
         %mean of all the errors in order to save computational time.
-        arrivalPoints= arrivalPoints(:, meanError> mean(meanError));
-        %Delete parent node from the list of children of current nodes
-        arrivalPoints= arrivalPoints(:,~ismember(arrivalPoints(1:2,:)',parent','rows'));        
+        arrivalPoints= arrivalPoints(:, meanError >= mean(meanError));    
         meanError= arrivalPoints(3,:);
         arrivalPoints= arrivalPoints(1:2,:);
         

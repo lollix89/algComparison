@@ -55,13 +55,14 @@ end
 sph=@(param,h) ((h<param(2))*0.5.*(3*h/(param(2))-(h/param(2)).^3) + (h>=param(2)))*(param(1));
 %sph=@(param,h) param(1)+(h<param(3)).*((param(2)-param(1))*(3.*h./(2*param(3))-1/2*(h./param(3)).^3))+(h>=param(3)).*(param(2)-param(1));
 % expo=@(param,h) (param(2)-param(1))*(1-exp(-h/param(3)))+param(1);
-% gauss=@(param,h) (param(2)-param(1))*(1-exp(-(h/param(3)).^2))+param(1);
+gauss=@(param,h) (param(1))*(1-exp(-(h/param(2)).^2));
 % damp=@(param,h) (param(2)-param(1))*(1-exp(-3*h/param(4)).*cos((h/param(3))*pi))+param(1);
 % pow=@(param,h) param(1)+param(2)*h.^(param(3));
 % piecewise_lin_vario=@(param,h) (h<=param(5)).*(param(2)+param(1)*h)+(h>param(5)).*(param(4)+param(3)*(h-param(5)));
 %==================================================================================================
 
 models_handles{1}=sph;
+models_handles{2}=gauss;
 % models_handles{2}=expo;
 % models_handles{3}=damp;
 % models_handles{4}=pow;
@@ -72,21 +73,20 @@ W=diag(logspace(3,1,length(vario)),0); % Give more weights to the points at
 % small distance lags since they have more weight in the interpolation
 
 %==========================================================================
-for i=1:1%length(models_handles)
+for i=2%1:length(models_handles)
     % Assign according intitial parameters estimations to the models
     if(isequal(models_handles{i},sph))
-        param0=[nugget,sill,range];
         param0=[sill,range];
        [fitted_param, RMSE, ]=kriging.fitvario2(h, vario, param0, models_handles{i},W);
-    elseif(isequal(models_handles{i},expo))
-        param0=[nugget,sill,range];
-        [fitted_param, RMSE]=kriging.fitvario(h, vario, param0, models_handles{i},W);
-    elseif(isequal(models_handles{i},damp))
-        param0=[nugget, sill, range, damp_hole];
-        [fitted_param, RMSE]=kriging.fitvario(h, vario, param0, models_handles{i},W);
-    elseif(isequal(models_handles{i},pow))
-        param0=[nugget, const_pow, exponent_pow];
-        [fitted_param, RMSE]=kriging.fitvario(h, vario, param0, models_handles{i},W);  
+     elseif(isequal(models_handles{i},gauss))
+         param0=[sill,range];
+         [fitted_param, RMSE]=kriging.fitvario2(h, vario, param0, models_handles{i},W);
+%     elseif(isequal(models_handles{i},damp))
+%         param0=[nugget, sill, range, damp_hole];
+%         [fitted_param, RMSE]=kriging.fitvario(h, vario, param0, models_handles{i},W);
+%     elseif(isequal(models_handles{i},pow))
+%         param0=[nugget, const_pow, exponent_pow];
+%         [fitted_param, RMSE]=kriging.fitvario(h, vario, param0, models_handles{i},W);  
     end
    % Find out which model is the best
    if(RMSE<best_RMSE)

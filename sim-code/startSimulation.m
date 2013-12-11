@@ -8,7 +8,6 @@ function startSimulation(algorithm, strategy)
 %%          -"ACO": uses ACO to find the path that maximizes the mean error within the path
 %%          -"greedy": similar to ACO but always chooses the path with the highest error
 %%          -"random": samples randomly in the map without considering the error
-%%          -"spiral": moves on a spiral path. (commented)
 
 
 %%OSS:
@@ -19,7 +18,7 @@ close all;
 plotOn= 0;
 
 %Generate a random field
-field=fields.gaussian.generate('spherical',300,1,[25 25 0 qrs.config('FieldRange')]);
+field=fields.gaussian.generate(qrs.config('FieldModel'),300,1,[25 25 0 qrs.config('FieldRange')]);
 %Get config parameters
 fieldRange= qrs.config('FieldRange');
 
@@ -67,7 +66,7 @@ Range= 130;
 aX= [max(1, floor(posX-(Range/sqrt(2)))) min(Lx, floor(posX+(Range/sqrt(2))))];
 aY= [max(1, floor(posY-(Range/sqrt(2)))) min(Ly, floor(posY+(Range/sqrt(2))))];
 station= [randi(aX) randi(aY)];
-nWayPoints= 1;
+nWayPoints= 5;
 
 alreadySampled=[];
 errorMap=[];
@@ -88,29 +87,12 @@ grid(sub2ind(size(grid), samplingP(:,2), samplingP(:,1))) = field(sub2ind(size(f
 if strcmp(algorithm, 'mutualInfo')
     [prior,posterior,mutualInfo, temperatureVector]= mutual.initializeProbabilities(lx_, ly_);
 end
-% if strcmp(strategy, 'spiral')
-%     posX= 1;
-%     posY= 1;
-%     len= Lx;
-%     start= 1;
-%     spiralPath=[];
-%     while len> start
-%         spiralPath= [spiralPath; Lx(start) Ly(start)];
-%         spiralPath=[spiralPath; Lx(start+1:len)' ones(len-start,1).* Ly(start)];
-%         spiralPath=[spiralPath; ones(len-start,1).*Lx(len) Ly(start+1:len)'];
-%         spiralPath=[spiralPath; Lx(len-1:-1:start)' ones(len-start,1).*Ly(len)];
-%         spiralPath=[spiralPath; ones(len-start-1,1).*Lx(start) Ly(len-1:-1:start+1)'];
-%         start= start+1;
-%         len= len-1;
-%     end
-%     spiralPath= [spiralPath; Lx(start) Ly(start)];
-% end
 
 %% loop
 while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 3060) ...
         || ((strcmp('sample', strategy)|| strcmp('random', strategy)) && iter <= 200)...
         ||  (strcmp('spiral',strategy) && size(spiralPath,1) > 1)
-    %display(iter)
+    display(iter)
     %Get sampling points
     X=[];
     [X(:,2),X(:,1)]= ind2sub(size(grid), find(~isnan(grid)));   %sampling position as x(cols), y(rows)
@@ -149,6 +131,7 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
             Y_= (Y-meanV)/stdV;
             [fittedModel,fittedParam]= kriging.variogram(X,Y_,Range);
             [interpMap,~]= kriging.computeKriging(X,Y_,stdV,meanV,fittedModel,fittedParam,x_,y_);
+            
     end
     
     RMSE(iter) = sqrt(mean(mean((interpMap - field(x_,y_)).^2)));
@@ -201,14 +184,6 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
             availablePositionIndexes(randIdx,1);
             [y, x]= ind2sub(size(availablePositionMatrix), availablePositionIndexes(randIdx,1));
             Pts2visit= [x y];
-            %         case 'spiral'
-            %             if size(spiralPath,1)>= nWayPoints
-            %                 path= spiralPath(1:nWayPoints,:);
-            %             else
-            %                 path= spiralPath(1:end,:);
-            %             end
-            %             [Pts2visit,distance(iter+1),h0] = findPtsAlongPath(path, speedHeli, measPeriod,distance(iter),h0);
-            %             spiralPath= spiralPath(size(path,1)+1:end,:);
             
     end
     %Add sampled points to the grid
