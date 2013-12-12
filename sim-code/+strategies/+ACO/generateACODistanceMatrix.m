@@ -35,10 +35,11 @@ error = (error - min(error(:))) ./ range;
 for i= 1:nWayPoints +1
     while ~isempty(stack)   
         [arrivalPoints, tBoundaries]= strategies.findAllowableTriangles(stack(1,1), stack(2,1), fieldX, fieldY , allowableDirections, horizon);
-        meanError= strategies.computeMeanError(stack(1,1), stack(2,1), tBoundaries, error);
         if ~isempty(nodes);
-            [arrivalPoints, meanError]= strategies.avoidSharpBendAndLoop(horizon, previousDirection, allowableDirections, arrivalPoints, meanError, nodes(1:2,:)');
+            [arrivalPoints, tBoundaries]= strategies.avoidSharpBendAndLoop(horizon, previousDirection, allowableDirections, arrivalPoints, tBoundaries, nodes(1:2,:)');
         end
+        meanError= strategies.computeMeanError(stack(1,1), stack(2,1), tBoundaries, error);
+
         arrivalPoints(:, isnan(arrivalPoints(1,:)))= [];
         meanError(isnan(meanError))= [];
 

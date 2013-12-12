@@ -33,9 +33,10 @@ for i= 1:nWayPoints
     error = (error - min(error(:))) ./ range;
     
     [arrivalPoints, tBoundaries]= strategies.findAllowableTriangles(currentPosX, currentPosY, fieldX, fieldY , allowableDirections, horizon);
+    [arrivalPoints, tBoundaries]= strategies.avoidSharpBendAndLoop(horizon, previousDirection, allowableDirections, arrivalPoints, tBoundaries, path);
+
     meanError= strategies.computeMeanError(currentPosX, currentPosY, tBoundaries, error);
     
-    [arrivalPoints, meanError]= strategies.avoidSharpBendAndLoop(horizon, previousDirection, allowableDirections, arrivalPoints, meanError, path);
     
     [~, idx]= max(meanError);
     %Memorize current direction to forbid nearby opposite directions next iteration

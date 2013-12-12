@@ -1,4 +1,4 @@
-function [arrivalPoints, meanError]= avoidSharpBendAndLoop(horizon, previousDirection, allowableDirections, arrivalPoints, meanError, path)
+function [arrivalPoints, tBoundaries]= avoidSharpBendAndLoop(horizon, previousDirection, allowableDirections, arrivalPoints, tBoundaries, path)
 
 directionAngles= 0:(360/allowableDirections):359;
 
@@ -12,10 +12,12 @@ if ~isnan(previousDirection)
         (360/allowableDirections):(360/allowableDirections):radiusForbiddenDirections*(360/allowableDirections)), 360));
     [~, idx1, ~]= intersect(directionAngles, forbiddenDirs);
     if sum(~isnan(arrivalPoints(1,:)))> length(idx1)
-        arrivalPoints(3,:)= meanError;
         arrivalPoints(:,idx1)= nan;
-        meanError= arrivalPoints(3,:);
-        arrivalPoints= arrivalPoints(1:2,:);
+        idx2= idx1.*2;
+        idx2=idx2(ones(1,2),:);
+        idx2=idx2(:);
+        idx2(1:2:end)= idx2(1:2:end)-1;
+        tBoundaries(:,idx2)= nan;
     end
 end
 %Delete those points that fall within horizon from the previous points in the path of
@@ -35,10 +37,13 @@ if ~isempty(path)
     Distances= sqrt(sum((tmpHistory-tmpArrivalPoints).^2, 2));
     deleteIdx= unique(mod(find(Distances < (horizon-1e-8))-1, size(arrivalPoints,2))+1);
     if ~isempty(deleteIdx) && length(deleteIdx)< length(arrivalPoints)
-        arrivalPoints(3,:)= meanError;
         arrivalPoints(:,deleteIdx)= nan;
-        meanError= arrivalPoints(3,:);
-        arrivalPoints= arrivalPoints(1:2,:);
+        deleteIdx2= deleteIdx.*2;
+        deleteIdx2=deleteIdx2(:,ones(1,2));
+        deleteIdx2= deleteIdx2';
+        deleteIdx2=deleteIdx2(:);
+        deleteIdx2(1:2:end)= deleteIdx2(1:2:end)-1;
+        tBoundaries(:,deleteIdx2)= nan;
     end
 end
 end
