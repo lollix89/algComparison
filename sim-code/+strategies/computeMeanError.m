@@ -21,8 +21,8 @@ for i=1:2:size(tBoundaries, 2)-1
         width= maxX- minX;
         heigth= maxY- minY;
         
-        x= minX+ (1:4:width)';
-        y= minY+ (1:4:heigth);
+        x= minX+ (1:width)';
+        y= minY+ (1:heigth);
         X= x(:, ones(length(y),1));
         X= X(:);
         Y= y(ones(1,length(x)),:);

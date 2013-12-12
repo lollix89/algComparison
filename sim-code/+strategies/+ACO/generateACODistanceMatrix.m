@@ -39,16 +39,15 @@ for i= 1:nWayPoints +1
         if ~isempty(nodes);
             [arrivalPoints, meanError]= strategies.avoidSharpBendAndLoop(horizon, previousDirection, allowableDirections, arrivalPoints, meanError, nodes(1:2,:)');
         end
-        
         arrivalPoints(:, isnan(arrivalPoints(1,:)))= [];
         meanError(isnan(meanError))= [];
+
         arrivalPoints(3,:)= meanError;
         %Only leave the promising edges, those with an error higher that the
         %mean of all the errors in order to save computational time.
         arrivalPoints= arrivalPoints(:, meanError >= mean(meanError));    
         meanError= arrivalPoints(3,:);
         arrivalPoints= arrivalPoints(1:2,:);
-        
         nodes(:,end+1)= [stack(:,1); length(meanError)];
         errors=[errors meanError];
         futureStack= [ futureStack arrivalPoints];
