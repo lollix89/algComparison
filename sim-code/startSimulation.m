@@ -92,8 +92,7 @@ end
 
 %% loop
 while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< travellingDistance) ...
-        || ((strcmp('sample', strategy)|| strcmp('random', strategy)) && iter <= numberOfSamplings)...
-        ||  (strcmp('spiral',strategy) && size(spiralPath,1) > 1)
+        || ((strcmp('sample', strategy)|| strcmp('random', strategy)) && iter <= numberOfSamplings)
     display(iter)
     %Get sampling points
     X=[];
@@ -218,6 +217,9 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
         hold off
     end
     iter=iter+1;
+    if any(isnan(path))
+       disp('THERE IS STILL A BUG') 
+    end
 end
 saveResults(strategy, distance, RMSE, travellingDistance, numberOfSamplings)
 %movie2avi(F, 'movie.avi', 'compression','None', 'fps',0.5);

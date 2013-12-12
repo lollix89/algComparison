@@ -20,7 +20,7 @@ currentPosY= Sy;
 previousDirection= nan;
 
 for i= 1:nWayPoints
-    %find the boundaries to cinterpolate only the part of the error map
+    %find the boundaries to interpolate only the part of the error map
     %needed and save computational time
     extremeLeft= max(1, round(currentPosX-2*horizon));
     extremeRight= min(fieldX, round(currentPosX+ 2*horizon));
