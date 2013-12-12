@@ -4,7 +4,7 @@ JOB_NAME_PATTERN="\$SUB_NAME"
 DATA_DIR_PATTERN="./data/\$JOB_NAME"
 
 FIELD_MODEL="gauss"
-STRATEGY=('greedy' 'ACO')
+STRATEGY=('greedy' 'ACO' 'sample')
 ALGORITHM=('kriging' 'mutualInfo')
 
 NUM_RUNS=200
@@ -13,7 +13,7 @@ do
     for j in "${ALGORITHM[@]}"
     do
 
-        for k in 20 40 50 100
+        for k in 20 40 50 100 150
         do
     	   SUB_NAME="${i}_${j}_${k}"
     	   eval JOB_NAME=$JOB_NAME_PATTERN

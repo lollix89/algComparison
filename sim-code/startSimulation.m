@@ -43,8 +43,8 @@ grid= nan(Lx,Ly);
 %   -traveled distance in meters
 %   -sampling offset
 
-posX= randi([1 300]);
-posY= randi([1 300]);
+posX= randi([1 Lx]);
+posY= randi([1 Ly]);
 speedHeli= 3.7;
 allowableDirections= 16;
 horizon= 20;
@@ -67,6 +67,8 @@ aX= [max(1, floor(posX-(Range/sqrt(2)))) min(Lx, floor(posX+(Range/sqrt(2))))];
 aY= [max(1, floor(posY-(Range/sqrt(2)))) min(Ly, floor(posY+(Range/sqrt(2))))];
 station= [randi(aX) randi(aY)];
 nWayPoints= 5;
+travellingDistance= 5000;
+numberOfSamplings= 300;
 
 alreadySampled=[];
 errorMap=[];
@@ -89,8 +91,8 @@ if strcmp(algorithm, 'mutualInfo')
 end
 
 %% loop
-while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 3060) ...
-        || ((strcmp('sample', strategy)|| strcmp('random', strategy)) && iter <= 200)...
+while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< travellingDistance) ...
+        || ((strcmp('sample', strategy)|| strcmp('random', strategy)) && iter <= numberOfSamplings)...
         ||  (strcmp('spiral',strategy) && size(spiralPath,1) > 1)
     display(iter)
     %Get sampling points
@@ -217,7 +219,7 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
     end
     iter=iter+1;
 end
-saveResults(strategy, distance, RMSE)
+saveResults(strategy, distance, RMSE, travellingDistance, numberOfSamplings)
 %movie2avi(F, 'movie.avi', 'compression','None', 'fps',0.5);
 end
 
@@ -231,15 +233,15 @@ axis('equal')
 axis([-3 303 -3 303])
 end
 
-function saveResults(strategy, distance, RMSE)
+function saveResults(strategy, distance, RMSE, travellingDistance, numberOfSamplings)
 %%Save the simulation results to a file
 
 if strcmp(strategy, 'ACO') || strcmp(strategy,'greedy')
     distance= distance(1:end-1);
-    RMSE=interp1(distance,RMSE,0:50:3000,'linear','extrap');
-    dlmwrite([qrs.config('DataDirectory') '_' num2str(randi(1e+10,1))],[0:50:3000; RMSE]','-append');
+    RMSE=interp1(distance,RMSE,0:50:travellingDistance,'linear','extrap');
+    dlmwrite([qrs.config('DataDirectory') '_' num2str(randi(1e+10,1))],[0:50:travellingDistance; RMSE]','-append');
 else
-    dlmwrite([qrs.config('DataDirectory') '_' num2str(randi(1e+10,1))],[1:200; RMSE]', '-append');
+    dlmwrite([qrs.config('DataDirectory') '_' num2str(randi(1e+10,1))],[1:numberOfSamplings; RMSE]', '-append');
 end
 
 end
