@@ -217,9 +217,6 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
         hold off
     end
     iter=iter+1;
-    if any(isnan(path))
-       disp('THERE IS STILL A BUG') 
-    end
 end
 saveResults(strategy, distance, RMSE, travellingDistance, numberOfSamplings)
 %movie2avi(F, 'movie.avi', 'compression','None', 'fps',0.5);
