@@ -4,7 +4,7 @@ JOB_NAME_PATTERN="\$SUB_NAME"
 DATA_DIR_PATTERN="./data/\$JOB_NAME"
 
 FIELD_MODEL="gauss"
-STRATEGY=('greedy' 'ACO' 'sample')
+STRATEGY=('greedy' 'ACO' 'sample' 'random')
 ALGORITHM=('kriging' 'mutualInfo')
 
 NUM_RUNS=200
