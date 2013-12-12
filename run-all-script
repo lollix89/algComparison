@@ -3,7 +3,7 @@
 JOB_NAME_PATTERN="\$SUB_NAME"
 DATA_DIR_PATTERN="./data/\$JOB_NAME"
 
-FIELD_MODEL="gauss"
+FIELD_MODEL="spherical"
 STRATEGY=('greedy' 'ACO' 'sample' 'random')
 ALGORITHM=('kriging' 'mutualInfo')
 
