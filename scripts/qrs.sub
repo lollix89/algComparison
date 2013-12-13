@@ -24,4 +24,4 @@
 # take the checksum to obtain a 32-bit value
 QRS_SEED=$( echo -n $( date +%s%N ).$JOB_ID.$TASK_ID | cksum | cut -d ' ' -f1 )
 
-./scripts/template "matlab -nodesktop -nosplash -nojvm -r \"qrs.run('RandomSeed',$QRS_SEED, $*); exit;\""
+./scripts/template "matlab -nosplash -nodesktop -nojvm -r \"qrs.run('RandomSeed',$QRS_SEED, $*); exit;\""
