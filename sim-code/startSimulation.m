@@ -92,7 +92,7 @@ end
 %% loop
 while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< travellingDistance) ...
         || ((strcmp('sample', strategy)|| strcmp('random', strategy)) && iter <= numberOfSamplings)
-    display(iter)
+    %display(iter)
     %Get sampling points
     X=[];
     [X(:,2),X(:,1)]= ind2sub(size(grid), find(~isnan(grid)));   %sampling position as x(cols), y(rows)
@@ -237,8 +237,14 @@ function saveResults(strategy, distance, RMSE, travellingDistance, numberOfSampl
 if strcmp(strategy, 'ACO') || strcmp(strategy,'greedy')
     distance= distance(1:end-1);
     RMSE=interp1(distance,RMSE,0:50:travellingDistance,'linear','extrap');
+    if any(RMSE<0)
+        disp('BUG')
+    end
     dlmwrite([qrs.config('DataDirectory') '_' num2str(randi(1e+10,1))],[0:50:travellingDistance; RMSE]','-append');
 else
+    if any(RMSE<0)
+        disp('BUG')
+    end
     dlmwrite([qrs.config('DataDirectory') '_' num2str(randi(1e+10,1))],[1:numberOfSamplings; RMSE]', '-append');
 end
 

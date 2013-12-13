@@ -12,20 +12,13 @@ if ~isnan(previousDirection)
         (360/allowableDirections):(360/allowableDirections):radiusForbiddenDirections*(360/allowableDirections)), 360));
     [~, idx1, ~]= intersect(directionAngles, forbiddenDirs);
     if sum(~isnan(arrivalPoints(1,:)))> length(idx1)
+        idx1= idx1(:)';
         arrivalPoints(:,idx1)= nan;
         idx2= idx1.*2;
         idx2=idx2(ones(1,2),:);
         idx2=idx2(:);
         idx2(1:2:end)= idx2(1:2:end)-1;
         tBoundaries(:,idx2)= nan;
-    end
-    if any(isnan(arrivalPoints(1,:))) && 2*sum(isnan(arrivalPoints(1,:)))~=sum(isnan(tBoundaries(1,:)))
-        disp('*****')
-        idx1
-        idx2
-        arrivalPoints
-        tBoundaries
-        disp('*****')
     end 
 end
 %Delete those points that fall within horizon from the previous points in the path of
@@ -45,6 +38,7 @@ if ~isempty(path)
     Distances= sqrt(sum((tmpHistory-tmpArrivalPoints).^2, 2));
     deleteIdx= unique(mod(find(Distances < (horizon-1e-8))-1, size(arrivalPoints,2))+1);
     if ~isempty(deleteIdx) && sum(~isnan(arrivalPoints(1,:)))> length(deleteIdx)
+        deleteIdx=deleteIdx(:);
         arrivalPoints(:,deleteIdx)= nan;
         deleteIdx2= deleteIdx.*2;
         deleteIdx2=deleteIdx2(:,ones(1,2));
