@@ -19,6 +19,14 @@ if ~isnan(previousDirection)
         idx2(1:2:end)= idx2(1:2:end)-1;
         tBoundaries(:,idx2)= nan;
     end
+    if any(isnan(arrivalPoints(1,:))) && 2*sum(isnan(arrivalPoints(1,:)))~=sum(isnan(tBoundaries(1,:)))
+        disp('*****')
+        idx1
+        idx2
+        arrivalPoints
+        tBoundaries
+        disp('*****')
+    end 
 end
 %Delete those points that fall within horizon from the previous points in the path of
 %current iteration (try to avoid sharp bends or closed paths)

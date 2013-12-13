@@ -11,7 +11,7 @@ function [meanError]= computeMeanError(Sx, Sy, tBoundaries, error)
 meanError= zeros(1, size(tBoundaries, 2)/2);
 
 for i=1:2:size(tBoundaries, 2)-1
-    if all(~isnan(tBoundaries(:,i)))
+    if all(~isnan(tBoundaries(:,i))) && all(~isnan(tBoundaries(:,i+1)))
         %find square boundaries for every triangle (common vertex is the current position)
         minX= min([Sx tBoundaries(1,i) tBoundaries(1,i+1)]);
         maxX= max([Sx tBoundaries(1,i) tBoundaries(1,i+1)]);

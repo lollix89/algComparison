@@ -37,10 +37,6 @@ for i= 1:nWayPoints
     
     meanError= strategies.computeMeanError(currentPosX, currentPosY, tBoundaries, error);
     
-    if ~isequal(isnan(meanError), isnan(arrivalPoints(1,:))) || all(isnan(arrivalPoints(1,:)))
-        error([meanError '  ' arrivalPoints])
-    end
-    
     [~, idx]= max(meanError);
     %Memorize current direction to forbid nearby opposite directions next iteration
     directionAngles= 0:(360/allowableDirections):359;
@@ -50,9 +46,6 @@ for i= 1:nWayPoints
     currentPosX= arrivalPoints(1,idx);
     currentPosY= arrivalPoints(2,idx);
     
-end
-if any(isnan(Path))
-   disp('bug') 
 end
 end
 
