@@ -18,8 +18,7 @@ close all;
 plotOn= 0;
 
 %Generate a random field
-field=fields.gaussian.generate(qrs.config('FieldModel'),300,1,[25 25 0 qrs.config('FieldRange')]);
-%Get config parameters
+field= fields.gaussian.generate(qrs.config('FieldModel'),300,1,[25 25 0 qrs.config('FieldRange')]);
 fieldRange= qrs.config('FieldRange');
 
 [Ly,Lx]= size(field);
@@ -46,8 +45,8 @@ grid= nan(Lx,Ly);
 posX= randi([1 Lx]);
 posY= randi([1 Ly]);
 speedHeli= 3.7;
-allowableDirections= 16;
-horizon= 20;
+allowableDirections= qrs.config('AllowedDirections');
+horizon= qrs.config('Horizon');
 measPeriod= 3;
 distance= 0;
 h0= 0;
@@ -143,11 +142,11 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
             Map= nan(Lx,Ly);
             Map(x_,y_)= errorMap;
             [nodes,nextNodeIdxs,errors,pheromones]= strategies.ACO.generateACODistanceMatrix(posX, posY, Lx, Ly, Map, allowableDirections, horizon, nWayPoints);
-            path= strategies.ACO.findACOpath(nodes,nextNodeIdxs,errors,pheromones, nWayPoints);
-            posX= path(end,1);
-            posY= path(end,2);
+            Path= strategies.ACO.findACOpath(nodes,nextNodeIdxs,errors,pheromones, nWayPoints);
+            posX= Path(end,1);
+            posY= Path(end,2);
             
-            [Pts2visit, distance(iter+1), h0] = strategies.findPtsAlongPath(path, speedHeli, measPeriod,distance(iter),h0);
+            [Pts2visit, distance(iter+1), h0] = strategies.findPtsAlongPath(Path, speedHeli, measPeriod,distance(iter),h0);
         case 'greedy'
             %%
             % Find a path in the field by using a greedy strategy that
@@ -156,11 +155,11 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
             Map= nan(Lx,Ly);
             Map(x_,y_)= errorMap;
             
-            path= strategies.greedy.greedy(posX, posY, Lx, Ly, Map, allowableDirections, horizon, nWayPoints);
-            posX= path(end,1);
-            posY= path(end,2);
+            Path= strategies.greedy.greedy(posX, posY, Lx, Ly, Map, allowableDirections, horizon, nWayPoints);
+            posX= Path(end,1);
+            posY= Path(end,2);
             
-            [Pts2visit, distance(iter+1), h0] = strategies.findPtsAlongPath(path, speedHeli, measPeriod, distance(iter),h0);
+            [Pts2visit, distance(iter+1), h0] = strategies.findPtsAlongPath(Path, speedHeli, measPeriod, distance(iter),h0);
         case 'sample'
             %%
             %Assume the robot moves with infinite velocity to the point
@@ -200,7 +199,7 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
         hold on
         plot(X(:,1),X(:,2),'w+','linewidth',2)
         if strcmp('ACO', strategy) || strcmp('greedy', strategy)
-            plot(path(:,1),path(:,2),'k-o','linewidth',2,'MarkerFaceColor','k')
+            plot(Path(:,1),Path(:,2),'k-o','linewidth',2,'MarkerFaceColor','k')
         end
         hold off
         
@@ -211,7 +210,7 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
         hold on
         plot(X(:,1),X(:,2),'w+','linewidth',2)
         if strcmp('ACO', strategy) || strcmp('greedy', strategy)
-            plot(path(:,1),path(:,2),'k-o','linewidth',2,'MarkerFaceColor','k')
+            plot(Path(:,1),Path(:,2),'k-o','linewidth',2,'MarkerFaceColor','k')
         end
         drawnow
         hold off

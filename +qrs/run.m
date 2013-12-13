@@ -14,6 +14,25 @@ else
 	qrs.r.init;
 end
 
+%**************Get config parameters or set to default
+if ~isKey(qrs.config,'Horizon')
+    qrs.configuration.set('Horizon',20);
+end
+if ~isKey(qrs.config,'AllowedDirections')
+    qrs.configuration.set('AllowedDirections',8);
+end
+if ~isKey(qrs.config,'Sill')
+    qrs.configuration.set('Sill',25);
+end
+if ~isKey(qrs.config,'Function')
+    qrs.configuration.set('Function','linear');
+end
+if ~isKey(qrs.config,'Algorithm')
+    qrs.configuration.set('Algorithm','mutualInfo');
+end
+%*****************
+
+
 % add legacy code to path
 addpath('sim-code');
 

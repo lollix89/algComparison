@@ -20,18 +20,8 @@ function [prior, posterior, mutualInfo]= computePosteriorAndMutualInfo(prior, po
 % posterior      : posterior map updated
 % mutualInfo     : mutual information map updated
 
-if isKey(qrs.config,'Sill')
-    sill= str2double(qrs.config('Sill'));
-else
-    sill= 25;
-end
-
-if isKey(qrs.config,'Function')
-    func= qrs.config('Function');
-elseif ~isKey(qrs.config,'Function')
-    func= 'linear';
-end
-
+sill= qrs.config('Sill');
+func= qrs.config('Function');
 
 for i=1: size(coords,1)
     [~, closestValueIndex] = min(abs(temperatureV- samples(i)));
