@@ -18,7 +18,7 @@ close all;
 plotOn= 0;
 
 %Generate a random field
-field= fields.gaussian.generate(qrs.config('FieldModel'),300,1,[25 25 0 qrs.config('FieldRange')]);
+field= fields.gaussian.generate(qrs.config('FieldModel'),qrs.config('Size'),1,[25 25 0 qrs.config('FieldRange')]);
 fieldRange= qrs.config('FieldRange');
 
 [Ly,Lx]= size(field);
@@ -29,9 +29,6 @@ x_= ceil(delta/2)+(0:delta:Lx-1);
 y_= ceil(delta/2)+(0:delta:Ly-1);
 lx_= size(x_,2);
 ly_= size(y_,2);
-
-%Grid containing the sampling points
-grid= nan(Lx,Ly);
 
 %Robot parameters:
 %   -initial position of the robot
@@ -69,9 +66,6 @@ nWayPoints= 5;
 travellingDistance= 5000;
 numberOfSamplings= 300;
 
-alreadySampled=[];
-errorMap=[];
-
 if plotOn==1
     subplot(1,3,1);
     plotmap(0:2:Lx-1,0:2:Ly-1,field(1:2:end,1:2:end));
@@ -82,8 +76,10 @@ if plotOn==1
     drawnow
 end
 
-samplingP= [station; round([posX posY])];
-grid(sub2ind(size(grid), samplingP(:,2), samplingP(:,1))) = field(sub2ind(size(field), samplingP(:,2), samplingP(:,1)));
+Pts2Sample= [station; round([posX posY])];      %sampling position as x(cols), y(rows)
+valuePts2Sample= field(sub2ind(size(field), Pts2Sample(:,2), Pts2Sample(:,1)));
+samplePntHistory= Pts2Sample;
+sampleValueHistory= valuePts2Sample;
 
 if strcmp(algorithm, 'mutualInfo')
     [prior,posterior,mutualInfo, temperatureVector]= mutual.initializeProbabilities(lx_, ly_);
@@ -93,45 +89,34 @@ end
 while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< travellingDistance) ...
         || ((strcmp('sample', strategy)|| strcmp('random', strategy)) && iter <= numberOfSamplings)
     display(iter)
-    %Get sampling points
-    X=[];
-    [X(:,2),X(:,1)]= ind2sub(size(grid), find(~isnan(grid)));   %sampling position as x(cols), y(rows)
-    Y= grid(sub2ind(size(grid), X(:,2),X(:,1)));                %sampled values
     
     switch algorithm
         case 'kriging'
             %%
             %Kriging error controller
             %data standardization
-            meanV=mean(Y);
-            stdV=std(Y);
-            Y_=(Y-meanV)/stdV;
+            meanV=mean(sampleValueHistory);
+            stdV=std(sampleValueHistory);
+            Y_=(sampleValueHistory-meanV)/stdV;
             
             %Variogram fitting and kriging error computation
-            [fittedModel,fittedParam]= kriging.variogram(X,Y_,Range);
-            [interpMap,krigE]= kriging.computeKriging(X,Y_,stdV,meanV,fittedModel,fittedParam,x_,y_);
+            [fittedModel,fittedParam]= kriging.variogram(samplePntHistory,Y_,Range);
+            [interpMap,krigE]= kriging.computeKriging(samplePntHistory,Y_,stdV,meanV,fittedModel,fittedParam,x_,y_);
             errorMap= krigE;
             
         case 'mutualInfo'
             %%
             %Mutual information controller
-            if ~isempty(alreadySampled)
-                [samplePositions, indexUniqe]= setdiff(X,alreadySampled,'rows');
-                samples= Y(indexUniqe);
-            else
-                samplePositions= X;
-                samples= Y;
-            end
-            [prior, posterior, mutualInfo]= mutual.computePosteriorAndMutualInfo(prior, posterior, mutualInfo, temperatureVector, samples, samplePositions, fieldRange, delta, lx_, ly_);
+            [prior, posterior, mutualInfo]= mutual.computePosteriorAndMutualInfo(prior, posterior, mutualInfo, temperatureVector, valuePts2Sample, Pts2Sample, fieldRange, delta, lx_, ly_);
             errorMap= mutualInfo;
-            alreadySampled= [alreadySampled; samplePositions];
             %Interpolate values using Kriging interpolation algorithm
-            meanV= mean(Y);
-            stdV= std(Y);
-            Y_= (Y-meanV)/stdV;
-            [fittedModel,fittedParam]= kriging.variogram(X,Y_,Range);
-            [interpMap,~]= kriging.computeKriging(X,Y_,stdV,meanV,fittedModel,fittedParam,x_,y_);
-            
+            meanV= mean(sampleValueHistory);
+            stdV= std(sampleValueHistory);
+            Y_= (sampleValueHistory-meanV)/stdV;
+            [fittedModel,fittedParam]= kriging.variogram(samplePntHistory,Y_,Range);
+            [interpMap,~]= kriging.computeKriging(samplePntHistory,Y_,stdV,meanV,fittedModel,fittedParam,x_,y_);
+        otherwise
+            error('Wrong algorithm, possible values are [kriging mutualInfo]')
     end
     
     RMSE(iter) = sqrt(mean(mean((interpMap - field(x_,y_)).^2)));
@@ -144,22 +129,18 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
             [nodes,nextNodeIdxs,errors,pheromones]= strategies.ACO.generateACODistanceMatrix(posX, posY, Lx, Ly, Map, allowableDirections, horizon, nWayPoints);
             Path= strategies.ACO.findACOpath(nodes,nextNodeIdxs,errors,pheromones, nWayPoints);
             posX= Path(end,1);
-            posY= Path(end,2);
-            
-            [Pts2visit, distance(iter+1), h0] = strategies.findPtsAlongPath(Path, speedHeli, measPeriod,distance(iter),h0);
+            posY= Path(end,2); 
+            [Pts2Sample, distance(iter+1), h0] = strategies.findPtsAlongPath(Path, speedHeli, measPeriod,distance(iter),h0);
         case 'greedy'
             %%
             % Find a path in the field by using a greedy strategy that
-            % chooses the edge with the highest mean error.
-            
+            % chooses the edge with the highest mean error.  
             Map= nan(Lx,Ly);
             Map(x_,y_)= errorMap;
-            
             Path= strategies.greedy.greedy(posX, posY, Lx, Ly, Map, allowableDirections, horizon, nWayPoints);
             posX= Path(end,1);
-            posY= Path(end,2);
-            
-            [Pts2visit, distance(iter+1), h0] = strategies.findPtsAlongPath(Path, speedHeli, measPeriod, distance(iter),h0);
+            posY= Path(end,2);          
+            [Pts2Sample, distance(iter+1), h0] = strategies.findPtsAlongPath(Path, speedHeli, measPeriod, distance(iter),h0);
         case 'sample'
             %%
             %Assume the robot moves with infinite velocity to the point
@@ -169,7 +150,9 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
             Map(x_,y_)= errorMap;
             [~, idx]= max(Map(:));
             [y,x]= ind2sub(size(Map), idx);
-            Pts2visit= [x y];
+            posX= x;
+            posY= y;
+            Pts2Sample= [x y];
         case 'random'
             %%
             %All the strategy are disregarded and the robot moves with
@@ -183,12 +166,19 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
             randIdx= randi([1,size(availablePositionIndexes,1)]);
             availablePositionIndexes(randIdx,1);
             [y, x]= ind2sub(size(availablePositionMatrix), availablePositionIndexes(randIdx,1));
-            Pts2visit= [x y];
-            
+            posX= x;
+            posY= y;
+            Pts2Sample= [x y];
+        otherwise
+            error('Wrong strategy, possible values are [greedy ACO sample random]')    
     end
     %Add sampled points to the grid
-    if ~isempty(Pts2visit)
-        grid(sub2ind(size(grid), Pts2visit(:,2), Pts2visit(:,1))) = field(sub2ind(size(field), Pts2visit(:,2), Pts2visit(:,1)));
+    if ~isempty(Pts2Sample)
+        valuePts2Sample= field(sub2ind(size(field), Pts2Sample(:,2), Pts2Sample(:,1)));
+        samplePntHistory= [samplePntHistory; Pts2Sample];
+        [samplePntHistory,idx,~]= unique(samplePntHistory,'stable','rows');
+        sampleValueHistory= [sampleValueHistory; valuePts2Sample];
+        sampleValueHistory= sampleValueHistory(idx);
     end
     %Plots
     if plotOn==1
@@ -197,7 +187,7 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
         subplot(1,3,2)
         plotmap(x_,y_,interpMap)
         hold on
-        plot(X(:,1),X(:,2),'w+','linewidth',2)
+        plot(samplePntHistory(:,1),samplePntHistory(:,2),'w+','linewidth',2)
         if strcmp('ACO', strategy) || strcmp('greedy', strategy)
             plot(Path(:,1),Path(:,2),'k-o','linewidth',2,'MarkerFaceColor','k')
         end
@@ -208,7 +198,7 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
         subplot(1,3,3)
         plotmap(x_,y_,errorMap)
         hold on
-        plot(X(:,1),X(:,2),'w+','linewidth',2)
+        plot(samplePntHistory(:,1),samplePntHistory(:,2),'w+','linewidth',2)
         if strcmp('ACO', strategy) || strcmp('greedy', strategy)
             plot(Path(:,1),Path(:,2),'k-o','linewidth',2,'MarkerFaceColor','k')
         end
@@ -228,7 +218,7 @@ function plotmap(x,y,map)
 set(ch,'edgecolor','none');
 set(gca,'FontSize',16)
 axis('equal')
-axis([-3 303 -3 303])
+axis([-3 qrs.config('Size')+3 -3 qrs.config('Size')+3])
 end
 
 function saveResults(strategy, distance, RMSE, travellingDistance, numberOfSamplings)

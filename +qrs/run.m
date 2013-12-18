@@ -30,6 +30,9 @@ end
 if ~isKey(qrs.config,'Algorithm')
     qrs.configuration.set('Algorithm','mutualInfo');
 end
+if ~isKey(qrs.config,'Size')
+    qrs.configuration.set('Size',300);
+end
 %*****************
 
 

@@ -14,6 +14,7 @@ function [prior, posterior, mutualInfo]= computePosteriorAndMutualInfo(prior, po
 % range          : correlation range of the current field assumed to be
 %                   known
 % delta          : discretization interval for probability distributions
+% lx ly          : error map extension
 
 % OUTPUTS
 % prior          : Prior map updated
@@ -36,7 +37,7 @@ for i=1: size(coords,1)
     Distances= sqrt(sum((Coord-[((X-1).*delta)+delta/2 ((Y-1)*delta)+delta/2]).^2, 2));
     
     %Choosing the variance function to be used according to the config
-    %variable set by arguments
+    %variables
     if strcmp(func, 'spherical')
         sigmas_= (Distances<= range).*(.01 + (sill.*(1.5.*(Distances/range)-.5.*(Distances/range).^3))) + (Distances> range).*(.01+ sill);
     elseif strcmp(func, 'linear')
@@ -60,7 +61,7 @@ for i=1: size(coords,1)
     likelihood= likelihood./normFactor;
     
     evidence= sum((likelihood.*prior), 2);
-    %adding small bias to avid zero evidence case (performance reasons)
+    %adding small bias to avoid zero evidence case (performance)
     evidence= evidence+ 1e-200;
     evidence= evidence(:,ones(size(likelihood,2),1));
     posterior= (likelihood.*prior)./evidence;

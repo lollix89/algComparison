@@ -12,10 +12,10 @@ function [fieldPrior, fieldPosterior,  mutualInformationMap,  temperatureVector]
 %  mutualInformationMap     matrix of constant mutual information distribution
 %  temperatureVector        vector of temperature vector
 
-temperatureRange=[-12,58];
+temperatureRange=[5,45];            %mean of 25C with variance of 25C, take [-4sigma, +4sigma]
 temperatureInterval= .2;
 temperatureVector= (temperatureRange(1):temperatureInterval:temperatureRange(2));
 fieldPrior= ones(lx*ly, length(temperatureVector))./deal(length(temperatureVector));
 fieldPosterior= fieldPrior;
-mutualInformationMap= 10.*ones(ly, lx);
+mutualInformationMap= ones(ly, lx);
 end
