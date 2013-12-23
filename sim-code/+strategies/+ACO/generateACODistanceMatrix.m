@@ -39,7 +39,15 @@ for i= 1:nWayPoints +1
             [arrivalPoints, tBoundaries]= strategies.avoidSharpBendAndLoop(horizon, previousDirection, allowableDirections, arrivalPoints, tBoundaries, nodes(1:2,:)');
         end
         meanError= strategies.computeMeanError(stack(1,1), stack(2,1), tBoundaries, error);
-
+        
+        if sum(isnan(arrivalPoints(1,:))) ~= sum(isnan(meanError)) || 2* sum(isnan(meanError)) ~= sum(isnan(tBoundaries(1,:)))
+            disp('CRAP')
+            arrivalPoints
+            meanError
+            tBoundaries
+            stack
+        end
+        
         arrivalPoints(:, isnan(arrivalPoints(1,:)))= [];
         meanError(isnan(meanError))= [];
 

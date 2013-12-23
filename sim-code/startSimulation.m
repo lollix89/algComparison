@@ -88,7 +88,7 @@ end
 %% loop
 while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< travellingDistance) ...
         || ((strcmp('sample', strategy)|| strcmp('random', strategy)) && iter <= numberOfSamplings)
-    display(iter)
+    %display(iter)
     
     switch algorithm
         case 'kriging'
