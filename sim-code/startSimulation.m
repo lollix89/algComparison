@@ -39,8 +39,8 @@ ly_= size(y_,2);
 %   -traveled distance in meters
 %   -sampling offset
 
-posX= randi([1 Lx]);
-posY= randi([1 Ly]);
+posX= 1;%randi([1 Lx]);
+posY= 1;%randi([1 Ly]);
 speedHeli= 3.7;
 allowableDirections= qrs.config('AllowedDirections');
 horizon= qrs.config('Horizon');

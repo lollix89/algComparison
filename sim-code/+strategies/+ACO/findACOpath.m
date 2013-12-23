@@ -7,8 +7,6 @@ mu= 0.0085;
 rho= 0.065;
 maxPh= 1;
 
-%tree= [(struct.currentNode struct.error struct.pheromone struct.nextNode),...........   ]
-
 bestFitness=0;
 
 %% loop
@@ -24,8 +22,9 @@ listAnts=1:m;
 while ((~isempty(listAnts) && sum(ismember(cell2mat(visitedNodeIndexes), mostCommonPath, 'rows'))/length(listAnts) < .8) && iter < maxIterations) || isempty(listAnts)
     %initialization
     currentNodeIndex= ones(m,1);
-    [visitedNodeIndexes{1:m}]= deal(1);
-    fitnessUpdatePath= cell(m,1);  
+    [visitedNodeIndexes{:}]= deal(ones(1,pathLength+1));
+    fitnessUpdatePath= cell(m,1);
+    [fitnessUpdatePath{:}]=deal(zeros(1,pathLength));
     fitnesses= zeros(m,1);
     listAnts=1:m;
     
@@ -43,24 +42,20 @@ while ((~isempty(listAnts) && sum(ismember(cell2mat(visitedNodeIndexes), mostCom
                 end
             else
                 Q= pheromones(nextNodeIdxs);
-                p= Q./sum(Q);
-%                 if any(distanceTree(currentNodeIndex(I)).pheromone(:)== 1)
-%                     disp('edge saturated')
-%                 end
+                p= Q./sum(Q);  
                 
-                %We select a random Node with probability p
+                %We select a random Node with probability p             
                 [p,sortindex]= sort(p, 2, 'descend');
-                %Shuffle together because they need to be in correspondence
                 OrderednextNodeIdxs = nextNodeIdxs(sortindex);
                 nextNodeIdxIdx= OrderednextNodeIdxs(:, find( rand()< cumsum(p),1));
                 nextNodeIdx= nextNodes(nextNodeIdxIdx);
                 fitnesses(I)= fitnesses(I) + errors(nextNodeIdxIdx);
                 
                 %Save for updating fitness
-                fitnessUpdatePath{I}(end+1)= nextNodeIdxIdx;
+                fitnessUpdatePath{I}(currentLength)= nextNodeIdxIdx;
                 
                 currentNodeIndex(I) = nextNodeIdx;
-                visitedNodeIndexes{I}(end+1)= currentNodeIndex(I);
+                visitedNodeIndexes{I}(currentLength+1)= currentNodeIndex(I);
                 
             end
             currentLength=currentLength+1;

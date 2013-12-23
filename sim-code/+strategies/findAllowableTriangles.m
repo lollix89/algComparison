@@ -31,25 +31,39 @@ triangleAngles= triangleAngles(2:end-1);
 
 arrivalPoints= [Sx + cosd(directionAngles)*horizon; Sy + sind(directionAngles)*horizon] ;
 
-tBoundaries=[];
-tBoundaries= [tBoundaries [Sx + cosd(triangleAngles).*((horizon)/cosd((triangleAngle/2))); Sy + sind(triangleAngles).*((horizon)/cosd((triangleAngle/2)))]];
+tBoundaries= [Sx + cosd(triangleAngles).*((horizon)/cosd((triangleAngle/2))); Sy + sind(triangleAngles).*((horizon)/cosd((triangleAngle/2)))];
 
-%Check if all boundaries are in range and eventually crop.
-for i=1: size(tBoundaries, 2)
-    if any(tBoundaries(:,i)< 1)
-        tBoundaries(:,i)= max(1, tBoundaries(:,i));
-    end
-    if tBoundaries(1,i)> fieldX
-        tBoundaries(1,i)= min(fieldX, tBoundaries(1,i));
-    end
-    if tBoundaries(2,i)> fieldY
-        tBoundaries(2,i)= min(fieldY, tBoundaries(2,i));
-    end
+%Check if all boundaries are in range and eventually crop on the direction.
+%Handle boundaries
+if Sx==1 || Sx== fieldX || Sy==1 || Sy==fieldY
+    tBoundaries= max(1, tBoundaries);
+    tBoundaries(1,:)= min(fieldX, tBoundaries(1,:));
+    tBoundaries(2,:)= min(fieldY, tBoundaries(2,:));
+%Handle crossing with boundaries
+else
+    xBox= [0 0 fieldX fieldX 0];
+    yBox= [0 fieldY fieldY 0 0];
+    
+    segmentsX= [tBoundaries(1,:); ones(2,size(tBoundaries,2)).*Sx];
+    segmentsY= [tBoundaries(2,:); ones(2,size(tBoundaries,2)).*Sy];
+    segmentsX= segmentsX(:)';
+    segmentsY= segmentsY(:)';
+    [xi,yi,idx] = polyxpoly(segmentsX, segmentsY, xBox, yBox);
+    tBoundaries(:,ceil(idx(:,1)/3))= [xi yi]';
+    
+    segmentsX= [arrivalPoints(1,:); ones(2,size(arrivalPoints,2)).*Sx];
+    segmentsY= [arrivalPoints(2,:); ones(2,size(arrivalPoints,2)).*Sy];
+    segmentsX= segmentsX(:)';
+    segmentsY= segmentsY(:)';
+    [xi,yi,idx] = polyxpoly(segmentsX, segmentsY, xBox, yBox);
+    arrivalPoints(:,ceil(idx(:,1)/3))= [xi yi]';
+    
 end
+%Refine arrival points
 deleteIdxArrival=[];
 deleteIdxTriangles=[];
 for i= 1:size(arrivalPoints,2)
-    if any(arrivalPoints(:,i)<1) || arrivalPoints(1,i)> fieldX || arrivalPoints(2,i)> fieldY
+    if pdist([Sx Sy; arrivalPoints(:,i)'])< horizon/3 || any(arrivalPoints(:,i)<1) || arrivalPoints(1,i)> fieldX || arrivalPoints(2,i)> fieldY
         deleteIdxArrival= [deleteIdxArrival i];
         deleteIdxTriangles= [deleteIdxTriangles (i*2)-1 (i*2)];
     end
