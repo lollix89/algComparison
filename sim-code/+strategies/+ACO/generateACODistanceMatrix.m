@@ -40,12 +40,8 @@ for i= 1:nWayPoints +1
         end
         meanError= strategies.computeMeanError(stack(1,1), stack(2,1), tBoundaries, error);
         
-        if sum(isnan(arrivalPoints(1,:))) ~= sum(isnan(meanError)) || 2* sum(isnan(meanError)) ~= sum(isnan(tBoundaries(1,:)))
-            disp('CRAP')
-            arrivalPoints
-            meanError
-            tBoundaries
-            stack
+        if sum(isnan(meanError))~= sum(isnan(tBoundaries(1,:)))/2
+            disp('horizon is too short');   
         end
         
         arrivalPoints(:, isnan(arrivalPoints(1,:)))= [];

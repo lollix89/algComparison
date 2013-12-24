@@ -36,6 +36,9 @@ for i= 1:nWayPoints
     [arrivalPoints, tBoundaries]= strategies.avoidSharpBendAndLoop(horizon, previousDirection, allowableDirections, arrivalPoints, tBoundaries, Path);
     
     meanError= strategies.computeMeanError(currentPosX, currentPosY, tBoundaries, error);
+    if sum(isnan(meanError))~= sum(isnan(tBoundaries(1,:)))/2
+        disp('horizon is too short');
+    end
     
     [~, idx]= max(meanError);
     %Memorize current direction to forbid nearby opposite directions next iteration

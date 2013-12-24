@@ -63,7 +63,7 @@ end
 deleteIdxArrival=[];
 deleteIdxTriangles=[];
 for i= 1:size(arrivalPoints,2)
-    if pdist([Sx Sy; arrivalPoints(:,i)'])< horizon/3 || any(arrivalPoints(:,i)<1) || arrivalPoints(1,i)> fieldX || arrivalPoints(2,i)> fieldY
+    if pdist([Sx Sy; arrivalPoints(:,i)'])< horizon/2 || pdist([Sx Sy; arrivalPoints(:,i)'])< 5 || any(arrivalPoints(:,i)<1) || arrivalPoints(1,i)> fieldX || arrivalPoints(2,i)> fieldY
         deleteIdxArrival= [deleteIdxArrival i];
         deleteIdxTriangles= [deleteIdxTriangles (i*2)-1 (i*2)];
     end
