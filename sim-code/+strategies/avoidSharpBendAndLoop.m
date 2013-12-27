@@ -6,7 +6,7 @@ directionAngles= 0:(360/allowableDirections):359;
 %corresponding values and mean error. The forbidden directions are used
 %to avoid the robot to turn back on the path it came from.
 if ~isnan(previousDirection)
-    radiusForbiddenDirections= floor(allowableDirections/5);
+    radiusForbiddenDirections= floor(allowableDirections/8);
     [~, closestIdx] = min(abs(directionAngles- mod(previousDirection + 180,360)));
     forbiddenDirs= (mod(directionAngles(closestIdx)+ (-radiusForbiddenDirections*...
         (360/allowableDirections):(360/allowableDirections):radiusForbiddenDirections*(360/allowableDirections)), 360));

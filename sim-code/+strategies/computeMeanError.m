@@ -48,8 +48,13 @@ for i=1:2:size(tBoundaries, 2)-1
         innerPointY= round(Y((sign(ab).*sign(bc)>0 - sign(bc).*sign(ca)> 0)==0));
         linIndexes= ((innerPointX-1).* size(error,1)) + innerPointY;
         innerPoints= error(linIndexes);
-        
-        meanError(ceil(i/2))= sum(innerPoints)/length(innerPoints);
+        if isempty(innerPoints)
+            %triangle is too tiny and there are no error samples in it.
+            %Just set it to 0
+            meanError(ceil(i/2))= 0;
+        else
+            meanError(ceil(i/2))= sum(innerPoints)/length(innerPoints);
+        end
     else
         meanError(ceil(i/2))=  nan;
     end
