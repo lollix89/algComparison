@@ -36,7 +36,7 @@ if ~isempty(path)
     tmpArrivalPoints= arrivalPoints(:, IdxA)';
     
     Distances= sqrt(sum((tmpHistory-tmpArrivalPoints).^2, 2));
-    deleteIdx= unique(mod(find(Distances < (horizon-1e-8))-1, size(arrivalPoints,2))+1);
+    deleteIdx= unique(mod(find(Distances < (horizon-1e-8)/2)-1, size(arrivalPoints,2))+1);
     if ~isempty(deleteIdx) && sum(~isnan(arrivalPoints(1,:)))> length(deleteIdx)
         deleteIdx=deleteIdx(:);
         arrivalPoints(:,deleteIdx)= nan;
