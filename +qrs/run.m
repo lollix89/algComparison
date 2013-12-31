@@ -6,7 +6,7 @@ function run(varargin)
 clearvars -global QRS_CONFIG
 qrs.configuration.set(varargin{:});
 
-% initialize RNGs
+% initialize RNDs
 if isKey(qrs.config,'RandomSeed')
 	rng(qrs.config('RandomSeed'));
 	qrs.r.init(qrs.config('RandomSeed'));
@@ -21,22 +21,33 @@ end
 if ~isKey(qrs.config,'AllowedDirections')
     qrs.configuration.set('AllowedDirections',8);
 end
-if ~isKey(qrs.config,'Sill')
-    qrs.configuration.set('Sill',25);
-end
 if ~isKey(qrs.config,'Function')
     qrs.configuration.set('Function','linear');
 end
 if ~isKey(qrs.config,'Algorithm')
     qrs.configuration.set('Algorithm','mutualInfo');
 end
+if ~isKey(qrs.config,'Strategy')
+    qrs.configuration.set('Strategy','sample');
+end
 if ~isKey(qrs.config,'Size')
     qrs.configuration.set('Size',300);
 end
+if ~isKey(qrs.config,'Estimation')
+    qrs.configuration.set('Estimation',1);
+end
+
+%Parameters used only if Estimation is false i.e if the model is
+%supposed known or we are running some tests to understand the effect of
+%having a wrong underlkying model assumption.
+
+if isequal(qrs.config('Estimation'), 0) && (~isKey(qrs.config,'Sill') || ~isKey(qrs.config,'Range'))
+    error('[error]: If estimation function is turned off, the user must provide the parameters of sill and range!!!!!')
+end
+
 %*****************
 
-
-% add legacy code to path
+% add code to path
 addpath('sim-code');
 
 startSimulation(qrs.config('Algorithm'),qrs.config('Strategy'));

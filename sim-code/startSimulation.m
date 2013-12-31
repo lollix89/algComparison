@@ -12,14 +12,13 @@ function startSimulation(algorithm, strategy)
 
 %%OSS:
 %%      both algorithms use kriging as interpolation strategy.
-%%      when using strategy "random" or "spiral" the algorithm used doesn't matter.
+%%      when using strategy "random" the algorithm used doesn't matter.
 %%      for every run the position of the robot is random and so is the position of the unique static sensor.
 close all;
 plotOn= 0;
 
 %Generate a random field
 field= fields.gaussian.generate(qrs.config('FieldModel'),qrs.config('Size'),1,[25 25 0 qrs.config('FieldRange')]);
-fieldRange= qrs.config('FieldRange');
 
 [Ly,Lx]= size(field);
 
@@ -82,7 +81,7 @@ samplePntHistory= Pts2Sample;
 sampleValueHistory= valuePts2Sample;
 
 if strcmp(algorithm, 'mutualInfo')
-    [prior,posterior,mutualInfo, temperatureVector]= mutual.initializeProbabilities(lx_, ly_);
+    [prior,posterior,mutualInfo, tVector]= mutual.initializeProbabilities(lx_, ly_);
 end
 
 %% loop
@@ -99,22 +98,43 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
             stdV=std(sampleValueHistory);
             Y_=(sampleValueHistory-meanV)/stdV;
             
-            %Variogram fitting and kriging error computation
-            [fittedModel,fittedParam]= kriging.variogram(samplePntHistory,Y_,Range);
-            [interpMap,krigE]= kriging.computeKriging(samplePntHistory,Y_,stdV,meanV,fittedModel,fittedParam,x_,y_);
+            %Variogram fitting and kriging error computation. If estimation
+            %is true we estimate the parameters, otherwise we just take
+            %those provided.
+            if isequal(qrs.config('Estimation'),1)
+                [fittedModel,Param]= kriging.variogram(samplePntHistory,Y_,Range);
+            else
+               fittedModel= @(param,h) ((h<param(2))*0.5.*(3*h/(param(2))-(h/param(2)).^3) + (h>=param(2)))*(param(1));
+               stdV= qrs.config('Sill');
+               Param= [1 qrs.config('Range')];
+            end
+            [interpMap,krigE]= kriging.computeKriging(samplePntHistory,Y_,stdV,meanV,fittedModel,Param,x_,y_);
             errorMap= krigE;
             
         case 'mutualInfo'
             %%
-            %Mutual information controller
-            [prior, posterior, mutualInfo]= mutual.computePosteriorAndMutualInfo(prior, posterior, mutualInfo, temperatureVector, valuePts2Sample, Pts2Sample, fieldRange, delta, lx_, ly_);
+            %Mutual information controller.  If estimation
+            %is true we estimate the parameters, otherwise we just take
+            %those provided.
+            if isequal(qrs.config('Estimation'),1)
+                meanV=mean(sampleValueHistory);
+                stdV=std(sampleValueHistory);
+                Y_=(sampleValueHistory-meanV)/stdV;
+                [~,Param]= kriging.variogram(samplePntHistory,Y_,Range);
+                Param= Param.*stdV+meanV;
+            else
+               Param= [qrs.config('Sill') qrs.config('Range')];
+            end
+            Param= num2cell(Param);
+            Param{end+1}= qrs.config('Function');
+            [prior, posterior, mutualInfo]= mutual.computePosteriorAndMutualInfo(prior, posterior, mutualInfo, tVector, valuePts2Sample, Pts2Sample, Param, delta);
             errorMap= mutualInfo;
             %Interpolate values using Kriging interpolation algorithm
             meanV= mean(sampleValueHistory);
             stdV= std(sampleValueHistory);
             Y_= (sampleValueHistory-meanV)/stdV;
-            [fittedModel,fittedParam]= kriging.variogram(samplePntHistory,Y_,Range);
-            [interpMap,~]= kriging.computeKriging(samplePntHistory,Y_,stdV,meanV,fittedModel,fittedParam,x_,y_);
+            [fittedModel,Param]= kriging.variogram(samplePntHistory,Y_,Range);
+            [interpMap,~]= kriging.computeKriging(samplePntHistory,Y_,stdV,meanV,fittedModel,Param,x_,y_);
         otherwise
             error('Wrong algorithm, possible values are [kriging mutualInfo]')
     end
