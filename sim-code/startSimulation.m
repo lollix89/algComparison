@@ -127,13 +127,18 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
             end
             Param= num2cell(Param);
             Param{end+1}= qrs.config('Function');
-            [prior, posterior, mutualInfo]= mutual.computePosteriorAndMutualInfo(prior, posterior, mutualInfo, tVector, valuePts2Sample, Pts2Sample, Param, delta);
+            [prior, posterior, mutualInfo]= mutual.computePosteriorAndMutualInfo(prior, posterior, mutualInfo, tVector, valuePts2Sample, Pts2Sample, Param, delta);            
             errorMap= mutualInfo;
             %Interpolate values using Kriging interpolation algorithm
-            meanV= mean(sampleValueHistory);
-            stdV= std(sampleValueHistory);
-            Y_= (sampleValueHistory-meanV)/stdV;
-            [fittedModel,Param]= kriging.variogram(samplePntHistory,Y_,Range);
+            if isequal(qrs.config('Estimation'),1)
+                [fittedModel,Param]= kriging.variogram(samplePntHistory,Y_,Range);
+            else
+                fittedModel= @(param,h) ((h<param(2))*0.5.*(3*h/(param(2))-(h/param(2)).^3) + (h>=param(2)))*(param(1));
+                Param= [1 qrs.config('Range')];
+                stdV= qrs.config('Sill');
+                meanV= mean(sampleValueHistory);
+                Y_= (sampleValueHistory-meanV)/stdV;
+            end
             [interpMap,~]= kriging.computeKriging(samplePntHistory,Y_,stdV,meanV,fittedModel,Param,x_,y_);
         otherwise
             error('Wrong algorithm, possible values are [kriging mutualInfo]')
