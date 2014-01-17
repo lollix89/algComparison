@@ -73,7 +73,7 @@ W=diag(logspace(3,1,length(vario)),0); % Give more weights to the points at
 % small distance lags since they have more weight in the interpolation
 
 %==========================================================================
-for i=1:1%length(models_handles)
+for i=2:2%length(models_handles)
     % Assign according intitial parameters estimations to the models
     if(isequal(models_handles{i},sph))
         param0=[sill,range];
