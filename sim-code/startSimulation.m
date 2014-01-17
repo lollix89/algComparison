@@ -15,7 +15,7 @@ function startSimulation(algorithm, strategy)
 %%      when using strategy "random" the algorithm used doesn't matter.
 %%      for every run the position of the robot is random and so is the position of the unique static sensor.
 close all;
-plotOn= 0;
+plotOn= 1;
 
 %Generate a random field
 field= fields.gaussian.generate(qrs.config('FieldModel'),qrs.config('Size'),1,[25 25 0 qrs.config('FieldRange')]);
@@ -92,21 +92,21 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
     switch algorithm
         case 'kriging'
             %%
-            %Kriging error controller
-            %data standardization
-            meanV=mean(sampleValueHistory);
-            stdV=std(sampleValueHistory);
-            Y_=(sampleValueHistory-meanV)/stdV;
-            
+            %Kriging error controller            
             %Variogram fitting and kriging error computation. If estimation
             %is true we estimate the parameters, otherwise we just take
             %those provided.
             if isequal(qrs.config('Estimation'),1)
+                meanV=mean(sampleValueHistory);
+                stdV=std(sampleValueHistory);
+                Y_=(sampleValueHistory-meanV)/stdV;
                 [fittedModel,Param]= kriging.variogram(samplePntHistory,Y_,Range);
             else
                fittedModel= @(param,h) ((h<param(2))*0.5.*(3*h/(param(2))-(h/param(2)).^3) + (h>=param(2)))*(param(1));
-               stdV= qrs.config('Sill');
+               meanV= mean(sampleValueHistory);
+               stdV= sqrt(qrs.config('Sill'));
                Param= [1 qrs.config('Range')];
+               Y_=(sampleValueHistory-meanV)/stdV;
             end
             [interpMap,krigE]= kriging.computeKriging(samplePntHistory,Y_,stdV,meanV,fittedModel,Param,x_,y_);
             errorMap= krigE;
@@ -117,11 +117,11 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
             %is true we estimate the parameters, otherwise we just take
             %those provided.
             if isequal(qrs.config('Estimation'),1)
-                meanV=mean(sampleValueHistory);
-                stdV=std(sampleValueHistory);
+                meanV= mean(sampleValueHistory);
+                stdV= std(sampleValueHistory);
                 Y_=(sampleValueHistory-meanV)/stdV;
                 [~,Param]= kriging.variogram(samplePntHistory,Y_,Range);
-                Param= Param.*stdV+meanV;
+                Param= [Param(1) + stdV^2 Param(2)];
             else
                Param= [qrs.config('Sill') qrs.config('Range')];
             end
@@ -135,7 +135,7 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
             else
                 fittedModel= @(param,h) ((h<param(2))*0.5.*(3*h/(param(2))-(h/param(2)).^3) + (h>=param(2)))*(param(1));
                 Param= [1 qrs.config('Range')];
-                stdV= qrs.config('Sill');
+                stdV= sqrt(qrs.config('Sill'));
                 meanV= mean(sampleValueHistory);
                 Y_= (sampleValueHistory-meanV)/stdV;
             end

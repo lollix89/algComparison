@@ -18,15 +18,4 @@ lag=10;
 %fit variogram
 [fittedModel, fittedParam, best_RMSE] = kriging.adjust_vario(lags, varioVal);
 
-%Plot fitted variogram
-
-%     figure
-%     plot(lags,varioVal, 'ok','MarkerFaceColor','b');hold on
-%     h_mod=linspace(0, range,100);
-%     plot(h_mod,fittedModel(fittedParam,h_mod),'k-','linewidth',2)
-%     set(gca,'FontSize',16)
-%     xlabel('distance (m)')
-%     ylabel('semi-variogram')
-%     hold off
-
 end
