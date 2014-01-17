@@ -15,7 +15,7 @@ function startSimulation(algorithm, strategy)
 %%      when using strategy "random" the algorithm used doesn't matter.
 %%      for every run the position of the robot is random and so is the position of the unique static sensor.
 close all;
-plotOn= 1;
+plotOn= 0;
 
 %Generate a random field
 field= fields.gaussian.generate(qrs.config('FieldModel'),qrs.config('Size'),1,[25 25 0 qrs.config('FieldRange')]);
