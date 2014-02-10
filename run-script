@@ -28,9 +28,7 @@ do
                             "'Algorithm','$alg',"		\
                             "'Strategy','$strategy',"		    \
                             "'Function','$varFunc',"            \
-                            "'Estimation',0,"            \
-                            "'Range',$(($range / 4)),"            \
-                            "'Sill',25,"            \
+                            "'Estimation',1,"            \
                             "'Function','$varFunc',"            \
                             "'FieldModel','$FIELD_MODEL'"  )
                         ./qclean $JOB_ID "$DATA_DIR" > /dev/null
@@ -44,9 +42,7 @@ do
                         "'FieldRange',$range,"              \
                         "'Algorithm','$alg',"       \
                         "'Strategy','$strategy',"            \
-                        "'Estimation',0,"            \
-                        "'Range',$(($range / 4)),"            \
-                        "'Sill',25,"            \
+                        "'Estimation',1,"            \
                         "'FieldModel','$FIELD_MODEL'"  )
                     ./qclean $JOB_ID "$DATA_DIR" > /dev/null
                 fi

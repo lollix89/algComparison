@@ -35,3 +35,7 @@ Examples:
 
 qrs.run('DataDirectory','./data/result','RandomSeed',2345233, 'FieldRange',100, 'Algorithm','mutualInfo', 'Strategy','sample', 'FieldModel','spherical')
 
+RUNNING ON CLUSTER
+
+Running many simulation on clusters can be done by mean of a bash script. In this directory there is one script provided with an example of simulation. Upload the root directory to the master node of the cluster, change permissions to the script (chmod a+x ./namefile) and execute it to start the simulation.
+
