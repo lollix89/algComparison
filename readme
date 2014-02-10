@@ -1,0 +1,37 @@
+Readme file for running the simulations.
+Parameters for running the simulation in matlab.
+Mandatory:
+
+-'DataDirectory'-> output file path
+-'FieldRange'-> correlation range of the generated field
+
+Optional:
+
+-'Horizon'-> length of edge for all plannign algorithms [default value is 20 meters]
+-'AllowedDirections'-> Number of allowed directions from current position [default is 8]
+-'Function'-> Underlying model assumed by mutual information controller[default value is 'spherical']
+-'Algorithm'-> Type of controller used by the algorithm [default value is 'mutualInfo']
+-'Strategy'-> Type of strategy used by the controller [default is 'sample']
+-'Size'-> Size of the generated field [default is 300 meters]
+-'Estimation'-> Determines whether the estimation procedure is on or off. If it is off there are two more mandatory parameters 'sill' and 'range' which are the known parameters of the field [default is 1 (estimation on)]
+-'Sill'-> (*mandatory when 'Estimation' is off, discarded otherwise*) Underlying value of sill from the known model parameter
+-'Range'-> (*mandatory when 'Estimation' is off, discarded otherwise*) Underlying value of range from the known model parameter
+
+Possible values for the different parameters
+
+-'FieldRange'-> any positive integer
+-'Horizon'-> any positive integer (by increasing the value of horizon the computational cost increases)
+- 'AllowedDirections'-> any positive integer [recommended values are between 4 and 16, more or less doesn't make a lot of sense for the purposes of the simulation]
+-'Function'-> 'spherical' 'linear' 'quadratic' 'cubic'
+-'Algorithm'-> 'mutualInfo', 'kriging'
+-'Strategy'-> 'sample' 'greedy' 'ACO'
+-'Size'-> any positive integer number
+-'Estimation'-> 0 (off) or 1 (on)
+-'Sill'-> any positive integer corresponding to the sill value of the field
+-'Range'-> any positive integer corresponding to the ran ge of the field
+
+
+Examples:
+
+qrs.run('DataDirectory','./data/result','RandomSeed',2345233, 'FieldRange',100, 'Algorithm','mutualInfo', 'Strategy','sample', 'FieldModel','spherical')
+

@@ -22,7 +22,7 @@ if ~isKey(qrs.config,'AllowedDirections')
     qrs.configuration.set('AllowedDirections',8);
 end
 if ~isKey(qrs.config,'Function')
-    qrs.configuration.set('Function','linear');
+    qrs.configuration.set('Function','spherical');
 end
 if ~isKey(qrs.config,'Algorithm')
     qrs.configuration.set('Algorithm','mutualInfo');

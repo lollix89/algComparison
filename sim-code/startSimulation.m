@@ -9,13 +9,12 @@ function startSimulation(algorithm, strategy)
 %%          -"greedy": similar to ACO but always chooses the path with the highest error
 %%          -"random": samples randomly in the map without considering the error
 
-
 %%OSS:
 %%      both algorithms use kriging as interpolation strategy.
 %%      when using strategy "random" the algorithm used doesn't matter.
 %%      for every run the position of the robot is random and so is the position of the unique static sensor.
 close all;
-plotOn= 0;
+plotOn= 1;
 
 %Generate a random field
 field= fields.gaussian.generate(qrs.config('FieldModel'),qrs.config('Size'),1,[25 25 0 qrs.config('FieldRange')]);
@@ -60,7 +59,9 @@ iter=1;
 Range= 130;
 aX= [max(1, floor(posX-(Range/sqrt(2)))) min(Lx, floor(posX+(Range/sqrt(2))))];
 aY= [max(1, floor(posY-(Range/sqrt(2)))) min(Ly, floor(posY+(Range/sqrt(2))))];
-station= [randi(aX) randi(aY)];
+%station= [randi(aX) randi(aY)];
+station=[10 10; 15 10; 10 12; 14 14];
+
 nWayPoints= 5;
 travellingDistance= 5000;
 numberOfSamplings= 300;
@@ -110,7 +111,6 @@ while ((strcmp('ACO', strategy)|| strcmp('greedy',strategy)) && distance(iter)< 
             end
             [interpMap,krigE]= kriging.computeKriging(samplePntHistory,Y_,stdV,meanV,fittedModel,Param,x_,y_);
             errorMap= krigE;
-            
         case 'mutualInfo'
             %%
             %Mutual information controller.  If estimation
